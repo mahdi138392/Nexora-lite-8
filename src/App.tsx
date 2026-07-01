@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { WalletProvider, useWallet } from './context/WalletContext';
 import { ToastProvider } from './context/ToastContext';
 import { GameProvider } from './context/GameContext';
+import GameNotifications from './components/ui/GameNotifications';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -73,6 +74,7 @@ function App() {
     <ToastProvider>
       <GameProvider>
         <WalletProvider>
+          <GameNotifications />
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
