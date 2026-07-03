@@ -3,6 +3,7 @@ import { Crown, Medal, Award } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useGame, RANK_COLORS } from '../context/GameContext';
 import { getLeaderboardDB, getUserPositionDB } from '../lib/database';
+import Sidebar from '../components/Sidebar';
 
 interface LBRow {
   wallet_address: string;
@@ -63,8 +64,10 @@ const Leaderboard: React.FC = () => {
   const rest = data.slice(3, 10);
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-24 pb-24 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-bg-primary pt-20 lg:pt-24 pb-24 lg:pb-8">
+      <Sidebar />
+      <main className="lg:pl-60 px-4">
+        <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-black text-text-primary text-center">Leaderboard</h1>
         <p className="text-text-secondary text-center mt-2 mb-8">
           Compete with the best. Prove your knowledge.
@@ -165,7 +168,8 @@ const Leaderboard: React.FC = () => {
             </div>
           </>
         )}
-      </div>
+        </div>
+      </main>
 
       {/* Sticky bottom bar */}
       <div className="fixed bottom-16 lg:bottom-0 left-0 w-full z-40 bg-secondary-layer/95 backdrop-blur border-t-2 border-brand-purple px-4 py-3">

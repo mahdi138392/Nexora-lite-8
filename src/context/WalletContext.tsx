@@ -106,6 +106,14 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   const connectWallet = async (): Promise<boolean> => {
+    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (!window.ethereum && isMobileDevice) {
+      const currentUrl = window.location.href.replace(/^https?:\/\//, '');
+      window.location.href = `https://metamask.app.link/dapp/${currentUrl}`;
+      return false;
+    }
+
     if (!window.ethereum) {
       showToast('error', 'Please install MetaMask to continue');
       return false;

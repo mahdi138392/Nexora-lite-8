@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Star, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { BrainIcon, FootballIcon, CircuitIcon } from '../components/CategoryIcons';
 import Logo from '../components/Logo';
+import Sidebar from '../components/Sidebar';
 import { generateQuestion, QuestionData } from '../lib/gemini';
 import { useGame } from '../context/GameContext';
 import type { CategoryType, DifficultyType } from '../context/GameContext';
@@ -563,14 +564,17 @@ const Challenge: React.FC = () => {
   );
 
   return (
-    <>
-      {state === 'category' && renderCategorySelection()}
-      {state === 'difficulty' && renderDifficultySelection()}
-      {state === 'loading' && renderLoading()}
-      {state === 'question' && renderQuestion()}
-      {state === 'correct' && renderCorrect()}
-      {state === 'wrong' && renderWrong()}
-    </>
+    <div className="min-h-screen bg-bg-primary pt-20 lg:pt-24 pb-24 lg:pb-8">
+      <Sidebar />
+      <main className="lg:pl-60">
+        {state === 'category' && renderCategorySelection()}
+        {state === 'difficulty' && renderDifficultySelection()}
+        {state === 'loading' && renderLoading()}
+        {state === 'question' && renderQuestion()}
+        {state === 'correct' && renderCorrect()}
+        {state === 'wrong' && renderWrong()}
+      </main>
+    </div>
   );
 };
 
