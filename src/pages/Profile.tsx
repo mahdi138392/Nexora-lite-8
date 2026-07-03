@@ -3,6 +3,7 @@ import { Copy, Check, Shield, ShoppingBag, Receipt, ExternalLink, Flame } from '
 import Sidebar from '../components/Sidebar';
 import { useGame, RANK_COLORS, ACHIEVEMENTS } from '../context/GameContext';
 import { useWallet } from '../context/WalletContext';
+import { useAvatar, AVATAR_OPTIONS, avatarUrl } from '../context/AvatarContext';
 
 const STREAK_BONUS: Record<number, number> = { 1: 10, 2: 20, 3: 30, 4: 40, 5: 50 };
 
@@ -16,7 +17,9 @@ function formatDate(ts: number) {
 const Profile: React.FC = () => {
   const { gameState } = useGame();
   const { walletAddress } = useWallet();
+  const { avatarSeed, setAvatarSeed } = useAvatar();
   const [copied, setCopied] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const rankColor = RANK_COLORS[gameState.rank] || RANK_COLORS.Beginner;
   const nextRank = gameState.rank === 'Beginner' ? 'Bronze' : gameState.rank === 'Bronze' ? 'Silver' : gameState.rank === 'Silver' ? 'Gold' : null;
@@ -45,8 +48,24 @@ const Profile: React.FC = () => {
           {/* Header */}
           <div className="bg-card rounded-2xl p-6 lg:p-8 border border-brand-purple/20">
             <div className="flex flex-col sm:flex-row items-start gap-6">
-              <div className="w-20 h-20 rounded-full bg-gradient-brand flex items-center justify-center text-white text-2xl font-black flex-shrink-0">
-                0x
+              <div className="flex flex-col items-center flex-shrink-0">
+                {avatarSeed ? (
+                  <img
+                    src={avatarUrl(avatarSeed)}
+                    alt="Avatar"
+                    className="w-20 h-20 rounded-full flex-shrink-0 bg-secondary-layer"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gradient-brand flex items-center justify-center text-white text-2xl font-black flex-shrink-0">
+                    0x
+                  </div>
+                )}
+                <button
+                  onClick={() => setShowAvatarPicker(true)}
+                  className="text-brand-purple text-xs font-medium mt-2 hover:underline"
+                >
+                  {avatarSeed ? 'Change Avatar' : 'Choose Avatar'}
+                </button>
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -270,6 +289,45 @@ const Profile: React.FC = () => {
 
         </div>
       </main>
+
+      {showAvatarPicker && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setShowAvatarPicker(false)}
+        >
+          <div
+            className="bg-card rounded-2xl p-6 max-w-sm w-full"
+            style={{ border: '1px solid rgba(139,92,246,0.2)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-text-primary mb-4 text-center">
+              Choose Your Avatar
+            </h3>
+            <div className="grid grid-cols-4 gap-3">
+              {AVATAR_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => { setAvatarSeed(opt.seed); setShowAvatarPicker(false); }}
+                  className={`rounded-xl p-1.5 transition-all ${
+                    avatarSeed === opt.seed
+                      ? 'border-2 border-brand-purple bg-brand-purple/10'
+                      : 'border-2 border-transparent bg-secondary-layer hover:border-brand-purple/40'
+                  }`}
+                >
+                  <img src={avatarUrl(opt.seed)} alt={opt.id} className="w-full rounded-lg" />
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowAvatarPicker(false)}
+              className="w-full mt-5 py-2.5 bg-secondary-layer text-text-primary rounded-xl text-sm font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

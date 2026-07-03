@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { WalletProvider } from './context/WalletContext';
 import { ToastProvider } from './context/ToastContext';
 import { GameProvider } from './context/GameContext';
+import { AvatarProvider } from './context/AvatarContext';
 import GameNotifications from './components/ui/GameNotifications';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -118,12 +119,14 @@ function App() {
   return (
     <ToastProvider>
       <GameProvider>
-        <WalletProvider>
-          <GameNotifications />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </WalletProvider>
+        <AvatarProvider>
+          <WalletProvider>
+            <GameNotifications />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </WalletProvider>
+        </AvatarProvider>
       </GameProvider>
     </ToastProvider>
   );
