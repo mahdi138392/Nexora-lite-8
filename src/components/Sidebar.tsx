@@ -1,24 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  Gamepad2,
-  Trophy,
-  ShoppingBag,
-  User,
-  Settings,
-  LogOut,
-} from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
-
-const navItems = [
-  { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/challenge', icon: Gamepad2, label: 'Challenge' },
-  { path: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
-  { path: '/shop', icon: ShoppingBag, label: 'Shop' },
-  { path: '/profile', icon: User, label: 'Profile' },
-  { path: '/settings', icon: Settings, label: 'Settings' },
-];
+import { APP_NAV_ITEMS } from '../lib/navigation';
 
 const Sidebar: React.FC = () => {
   const { walletAddress, disconnectWallet } = useWallet();
@@ -29,7 +13,7 @@ const Sidebar: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col fixed left-0 top-16 bottom-16 w-60 bg-secondary-layer z-40">
         <nav className="flex-1 py-6 px-3">
-          {navItems.map((item) => {
+          {APP_NAV_ITEMS.map((item) => {
             const isActive = pathname === item.path;
 
             return (
@@ -67,7 +51,7 @@ const Sidebar: React.FC = () => {
       {/* Mobile Bottom Tab Bar */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-secondary-layer border-t border-card z-50 pb-safe">
         <div className="flex items-center justify-around py-2">
-          {navItems.slice(0, 5).map((item) => {
+          {APP_NAV_ITEMS.slice(0, 5).map((item) => {
             const isActive = pathname === item.path;
 
             return (

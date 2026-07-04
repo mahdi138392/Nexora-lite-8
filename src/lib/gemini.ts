@@ -55,7 +55,7 @@ STRICT RULES:
 Return EXACTLY this JSON (nothing else):
 {"question":"Your question here?","options":{"A":"First option","B":"Second option","C":"Third option","D":"Fourth option"},"correct":"B","explanation":"Brief factual explanation."}`;
 
-  let lastError: any = null;
+  let lastError: unknown = null;
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
@@ -79,7 +79,7 @@ Return EXACTLY this JSON (nothing else):
       }
 
       return parsed;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`[Gemini] Attempt ${attempt} failed:`, err);
       lastError = err;
       if (attempt < 2) {
@@ -88,6 +88,6 @@ Return EXACTLY this JSON (nothing else):
     }
   }
 
-  const detail = lastError?.message || 'Unknown error';
+  const detail = lastError instanceof Error ? lastError.message : 'Unknown error';
   throw new Error(`Failed to generate question: ${detail}`);
 }

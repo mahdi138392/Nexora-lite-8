@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check, AlertTriangle, ExternalLink } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
+import AppShell from '../components/ui/AppShell';
+import Surface from '../components/ui/Surface';
 import { useWallet } from '../context/WalletContext';
 
 interface Prefs {
@@ -51,14 +52,12 @@ const Settings: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-20 lg:pt-24 pb-20 lg:pb-8">
-      <Sidebar />
-      <main className="lg:pl-60">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+    <AppShell maxWidth="3xl">
           <h1 className="text-3xl font-bold text-text-primary mb-8">Settings</h1>
 
           {/* Account Card */}
-          <div className="bg-card rounded-2xl border border-brand-purple/15 p-6 mb-6">
+          <Surface className="mb-6">
             <h2 className="font-bold text-lg text-text-primary mb-5">Account</h2>
 
             <div className="py-4 flex justify-between items-center border-b border-secondary-layer">
@@ -114,10 +113,10 @@ const Settings: React.FC = () => {
                 Disconnect
               </button>
             </div>
-          </div>
+          </Surface>
 
           {/* Preferences Card */}
-          <div className="bg-card rounded-2xl border border-brand-purple/15 p-6 mb-6">
+          <Surface className="mb-6">
             <h2 className="font-bold text-lg text-text-primary mb-1">Preferences</h2>
             <p className="text-text-secondary text-xs mb-5">Saved in your browser</p>
 
@@ -144,10 +143,10 @@ const Settings: React.FC = () => {
                 <Toggle checked={prefs.autoAdvance} onChange={(v) => updatePref('autoAdvance', v)} />
               </div>
             </div>
-          </div>
+          </Surface>
 
           {/* About Card */}
-          <div className="bg-card rounded-2xl border border-brand-purple/15 p-6">
+          <Surface>
             <h2 className="font-bold text-lg text-text-primary mb-5">About Nexora</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
@@ -182,9 +181,8 @@ const Settings: React.FC = () => {
             <p className="text-center text-xs text-text-secondary opacity-60 mt-6 pt-4 border-t border-secondary-layer">
               Built by Meti pax
             </p>
-          </div>
-        </div>
-      </main>
+          </Surface>
+      </AppShell>
 
       {/* Disconnect Modal */}
       {showDisconnect && (
@@ -220,7 +218,7 @@ const Settings: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

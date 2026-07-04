@@ -14,17 +14,14 @@ import Leaderboard from './pages/Leaderboard';
 import Shop from './pages/Shop';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import { APP_SHELL_PATHS } from './lib/navigation';
 
 function GlobalCredit() {
   const location = useLocation();
   const [hideForFooter, setHideForFooter] = useState(false);
 
   const isHome = location.pathname === '/';
-  const pagesWithBottomNav = [
-    '/dashboard', '/challenge', '/leaderboard',
-    '/shop', '/profile', '/settings',
-  ];
-  const hasBottomNav = pagesWithBottomNav.includes(location.pathname);
+  const hasBottomNav = APP_SHELL_PATHS.includes(location.pathname);
 
   useEffect(() => {
     if (!isHome) {
