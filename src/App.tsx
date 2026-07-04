@@ -55,7 +55,7 @@ function GlobalCredit() {
         borderTop: '1px solid rgba(139,92,246,0.15)',
       }}
     >
-      <span className="text-[11px] text-text-secondary opacity-70">
+      <span className="text-[11px] text-text-secondary opacity-70 pb-1 inline-block">
         Built by Meti pax
       </span>
     </div>

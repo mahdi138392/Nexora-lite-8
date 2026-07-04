@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from './ToastContext';
 import { useGame } from './GameContext';
+import { useAvatar } from './AvatarContext';
 import type { GameState, RankType } from './GameContext';
 import {
   ensureUser,
@@ -62,6 +63,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [walletAddress, setWalletAddress] = useState('');
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
   const { showToast } = useToast();
+  const { assignDefaultIfMissing } = useAvatar();
   const {
     loadFromDBState,
     loadStateForWallet,
@@ -130,6 +132,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       localStorage.setItem('nexora_wallet', address.toLowerCase());
       loadStateForWallet(address);
       unlockAchievement('first_login');
+      assignDefaultIfMissing(address);
       await loadSupabaseState(address);
       const chainId = (await window.ethereum.request({ method: 'eth_chainId' })) as string;
       setIsCorrectNetwork(chainId === RITUAL_CHAIN_ID);
