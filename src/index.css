@@ -168,6 +168,46 @@ body::before {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(155, 109, 255, 0.45), rgba(55, 213, 255, 0.32), transparent);
   }
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--nexora-cyan);
+    outline-offset: 3px;
+  }
+
+  .interactive-lift {
+    transform: translateY(0);
+    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+  }
+
+  .interactive-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  .product-page-enter {
+    animation: productPageEnter 420ms ease both;
+  }
+
+  .product-reveal {
+    animation: productReveal 520ms ease both;
+  }
+
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+  }
+
 }
 
 .bg-card { background: linear-gradient(145deg, rgba(21, 36, 62, 0.88), rgba(10, 19, 35, 0.82)) !important; }
@@ -196,4 +236,31 @@ body::before {
 @keyframes floatUp {
   0% { opacity: 1; transform: translateX(-50%) translateY(0); }
   100% { opacity: 0; transform: translateX(-50%) translateY(-80px); }
+}
+
+@keyframes productPageEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes productReveal {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes skeletonShimmer {
+  100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .interactive-lift:hover {
+    transform: none;
+  }
 }

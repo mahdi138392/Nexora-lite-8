@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   Zap,
-  Star,
   Check,
   Loader2,
   Wallet,
   X,
   AlertCircle,
   Link2,
+  Crown,
+  Gem,
+  ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { useWallet } from '../context/WalletContext';
@@ -54,8 +57,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-card rounded-2xl p-6 max-w-md w-full"
-        style={{ border: '1px solid rgba(139,92,246,0.3)' }}
+        className="relative overflow-hidden premium-surface-strong rounded-[2rem] p-6 max-w-md w-full"
         onClick={(e) => e.stopPropagation()}
       >
         {loading ? (
@@ -116,7 +118,10 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         ) : (
           <>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-text-primary">Confirm Purchase</h3>
+              <div>
+                <p className="eyebrow-label text-gold text-xs">Ritual checkout</p>
+                <h3 className="text-2xl font-black text-text-primary">Confirm Exchange</h3>
+              </div>
               <button
                 onClick={onClose}
                 className="text-text-secondary hover:text-text-primary transition-colors"
@@ -126,11 +131,11 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             </div>
 
             <div className="space-y-4 mb-6">
-              <div className="flex items-center justify-between p-4 bg-secondary-layer rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-bg-primary/35 border border-white/5 rounded-2xl">
                 <span className="text-text-secondary">Item</span>
                 <span className="text-text-primary font-medium">{itemName}</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-secondary-layer rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-bg-primary/35 border border-white/5 rounded-2xl">
                 <span className="text-text-secondary">Price</span>
                 <span className="text-text-primary font-bold">{price} RITUAL</span>
               </div>
@@ -149,7 +154,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                 onClick={onConfirm}
                 className="flex-1 py-3 premium-button text-white rounded-xl font-semibold transition-all"
               >
-                Confirm
+                Confirm exchange
               </button>
               <button
                 onClick={onClose}
@@ -340,209 +345,133 @@ const Shop: React.FC = () => {
     );
   }
 
+  const items = [
+    {
+      type: 'xp_booster' as const,
+      name: 'XP Booster',
+      rarity: 'Ritual-paid · Rare',
+      price: '0.01',
+      icon: Zap,
+      accent: '#FBBF24',
+      frame: 'border-gold/30 bg-gold/[0.035]',
+      description: 'A 24-hour momentum charge for players ready to grind challenges.',
+      benefits: ['1.5× XP multiplier on all correct answers', 'Runs for 24 hours after purchase', 'Stacks value across every category and tier'],
+      active: xpBoosterActive,
+      loading: loadingBooster,
+      error: boosterError,
+      activeLabel: `Active — ${countdown.hours}h ${countdown.minutes}m remaining`,
+      cta: 'Charge booster',
+    },
+    {
+      type: 'premium_pass' as const,
+      name: 'Premium Pass',
+      rarity: 'Premium · Legendary',
+      price: '0.05',
+      icon: Crown,
+      accent: '#8B5CF6',
+      frame: 'border-brand-purple/35 bg-brand-purple/[0.04]',
+      description: 'Permanent prestige for your identity, profile, and leaderboard presence.',
+      benefits: ['Premium badge on profile', 'Special status in leaderboard rows', 'Permanent account recognition', 'Never expires'],
+      active: premiumStatus,
+      loading: loadingPremium,
+      error: premiumError,
+      activeLabel: 'Premium active',
+      cta: 'Unlock premium',
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-20 lg:pb-8">
       <Sidebar />
-      <main className="lg:pl-60">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="font-heading text-3xl lg:text-4xl font-bold text-text-primary mb-2 tracking-[-0.03em]">Shop</h1>
-            <p className="text-text-secondary mb-4">Enhance your Nexora experience</p>
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
-              style={{
-                backgroundColor: 'rgba(56,189,248,0.1)',
-                border: '1px solid rgba(56,189,248,0.2)',
-                fontSize: '12px',
-                color: '#38BDF8',
-              }}
-            >
-              <AlertCircle size={14} />
-              <span>Payments require Ritual Testnet</span>
-            </div>
-          </div>
-
-          {/* Shop Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CARD 1 — XP Booster */}
-            <div
-              className="bg-card rounded-2xl p-6"
-              style={{ border: '1px solid rgba(251,191,36,0.25)' }}
-            >
-              <Zap size={40} className="text-gold mb-4" />
-              <h3 className="text-2xl font-bold text-text-primary mb-2">XP Booster</h3>
-              <p className="text-text-secondary text-sm mb-4">
-                Earn 1.5× XP on all challenges for 24 hours
-              </p>
-
-              <div className="text-xl font-bold text-text-primary mb-3">0.01 RITUAL</div>
-
-              <div
-                className="inline-block px-3 py-1 rounded-full text-xs font-medium mb-4"
-                style={{
-                  backgroundColor: 'rgba(251,191,36,0.1)',
-                  color: '#FBBF24',
-                  border: '1px solid rgba(251,191,36,0.3)',
-                }}
-              >
-                24 Hours
-              </div>
-
-              <div className="h-px bg-secondary-layer my-4" />
-
-              <ul className="space-y-2 mb-6">
-                {[
-                  '1.5× XP multiplier on all correct answers',
-                  'Valid for 24 hours from time of purchase',
-                  'Works across all categories and difficulties',
-                ].map((benefit, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
-                    <Check size={16} className="text-success-emerald flex-shrink-0 mt-0.5" />
-                    <span>{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {xpBoosterActive ? (
-                <button
-                  disabled
-                  className="w-full py-3 rounded-xl font-semibold text-white"
-                  style={{ backgroundColor: '#10B981' }}
-                >
-                  ✓ Active — {countdown.hours}h {countdown.minutes}m remaining
-                </button>
-              ) : loadingBooster ? (
-                <button
-                  disabled
-                  className="w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2"
-                  style={{ backgroundColor: 'rgba(139,92,246,0.6)' }}
-                >
-                  <Loader2 size={18} className="animate-spin" />
-                  Processing...
-                </button>
-              ) : (
-                <button
-                  onClick={() => openConfirmModal('xp_booster')}
-                  className="w-full py-3 rounded-xl font-semibold text-white transition-all hover:scale-[1.02]"
-                  style={{ backgroundColor: '#8B5CF6' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#7C3AED')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8B5CF6')}
-                >
-                  Buy Now — 0.01 RITUAL
-                </button>
-              )}
-
-              {boosterError && (
-                <div className="mt-3">
-                  <p className="text-gold text-sm mb-2">{boosterError}</p>
-                  <button
-                    onClick={() => handleSwitchAndRetry('xp_booster')}
-                    className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
-                    style={{
-                      border: '1px solid #38BDF8',
-                      color: '#38BDF8',
-                      backgroundColor: 'transparent',
-                    }}
-                  >
-                    Switch Network
-                  </button>
+      <main className="lg:pl-60 product-page-enter">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <section className="relative overflow-hidden rounded-[2rem] premium-surface-strong p-6 lg:p-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(251,191,36,0.18),transparent_30%),radial-gradient(circle_at_82%_5%,rgba(55,213,255,0.14),transparent_34%)]" />
+            <div className="relative z-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 border border-gold/25 px-4 py-2 text-xs font-black text-gold mb-4">
+                  <Gem size={15} /> In-game economy
                 </div>
-              )}
-            </div>
-
-            {/* CARD 2 — Premium Pass */}
-            <div
-              className="relative bg-card rounded-2xl p-6"
-              style={{ border: '1px solid rgba(139,92,246,0.3)' }}
-            >
-              <div
-                className="absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-bold"
-                style={{ backgroundColor: '#FBBF24', color: '#0F172A' }}
-              >
-                MOST POPULAR
+                <h1 className="text-4xl lg:text-6xl font-black text-text-primary">Ritual Shop</h1>
+                <p className="mt-3 max-w-2xl text-text-secondary">Exchange Ritual testnet value for boosts, permanence, and visible prestige inside Nexora.</p>
               </div>
-
-              <Star size={40} className="text-gold mb-4" fill="currentColor" />
-              <h3 className="text-2xl font-bold text-text-primary mb-2">Premium Pass</h3>
-              <p className="text-text-secondary text-sm mb-4">
-                Unlock permanent premium status on the platform
-              </p>
-
-              <div className="text-xl font-bold text-text-primary mb-3">0.05 RITUAL</div>
-
-              <div
-                className="inline-block px-3 py-1 rounded-full text-xs font-medium mb-4"
-                style={{
-                  backgroundColor: 'rgba(139,92,246,0.1)',
-                  color: '#8B5CF6',
-                  border: '1px solid rgba(139,92,246,0.3)',
-                }}
-              >
-                Permanent
-              </div>
-
-              <div className="h-px bg-secondary-layer my-4" />
-
-              <ul className="space-y-2 mb-6">
-                {[
-                  'Premium badge displayed on your profile',
-                  'Special ⭐ status in the Leaderboard',
-                  'Premium account recognition',
-                  'Permanent — never expires',
-                ].map((benefit, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
-                    <Check size={16} className="text-success-emerald flex-shrink-0 mt-0.5" />
-                    <span>{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {premiumStatus ? (
-                <button
-                  disabled
-                  className="w-full py-3 rounded-xl font-semibold text-white"
-                  style={{ backgroundColor: '#10B981' }}
-                >
-                  ✓ Premium Active
-                </button>
-              ) : loadingPremium ? (
-                <button
-                  disabled
-                  className="w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2"
-                  style={{ backgroundColor: 'rgba(139,92,246,0.6)' }}
-                >
-                  <Loader2 size={18} className="animate-spin" />
-                  Processing...
-                </button>
-              ) : (
-                <button
-                  onClick={() => openConfirmModal('premium_pass')}
-                  className="w-full py-3 rounded-xl font-semibold text-white transition-all hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(to right, #8B5CF6, #FBBF24)' }}
-                >
-                  Buy Premium — 0.05 RITUAL
-                </button>
-              )}
-
-              {premiumError && (
-                <div className="mt-3">
-                  <p className="text-gold text-sm mb-2">{premiumError}</p>
-                  <button
-                    onClick={() => handleSwitchAndRetry('premium_pass')}
-                    className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
-                    style={{
-                      border: '1px solid #38BDF8',
-                      color: '#38BDF8',
-                      backgroundColor: 'transparent',
-                    }}
-                  >
-                    Switch Network
-                  </button>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl bg-bg-primary/35 border border-white/5 p-4">
+                  <p className="text-xs text-text-secondary">Wallet state</p>
+                  <p className="mt-1 font-black text-success-emerald">Connected</p>
                 </div>
-              )}
+                <div className={`rounded-2xl border p-4 ${isCorrectNetwork ? 'bg-success-emerald/10 border-success-emerald/25' : 'bg-gold/10 border-gold/25'}`}>
+                  <p className="text-xs text-text-secondary">Payment rail</p>
+                  <p className={`mt-1 font-black ${isCorrectNetwork ? 'text-success-emerald' : 'text-gold'}`}>{isCorrectNetwork ? 'Ritual ready' : 'Switch required'}</p>
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-2">
+            {items.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.type} className={`relative overflow-hidden rounded-[2rem] premium-surface p-6 border ${item.frame}`}>
+                  <div className="absolute right-5 top-5 rounded-full bg-bg-primary/50 border border-white/10 px-3 py-1 text-[10px] font-black text-text-secondary">{item.rarity}</div>
+                  <div className="flex items-start gap-4 pr-24">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-bg-primary/45" style={{ boxShadow: `0 18px 50px ${item.accent}30` }}>
+                      <Icon size={34} style={{ color: item.accent }} fill={item.type === 'premium_pass' ? 'currentColor' : 'none'} />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-black text-text-primary">{item.name}</h2>
+                      <p className="mt-2 text-sm text-text-secondary">{item.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-[1fr_auto] items-end gap-4 rounded-2xl bg-bg-primary/35 border border-white/5 p-4">
+                    <div>
+                      <p className="eyebrow-label text-xs text-text-secondary">Price</p>
+                      <p className="stat-number mt-1 text-4xl font-black text-text-primary">{item.price}</p>
+                    </div>
+                    <p className="mb-1 rounded-full bg-gold/10 px-3 py-1 text-sm font-black text-gold">RITUAL</p>
+                  </div>
+
+                  <ul className="mt-6 space-y-3">
+                    {item.benefits.map((benefit) => (
+                      <li key={benefit} className="flex items-start gap-3 text-sm text-text-secondary">
+                        <ShieldCheck size={17} className="mt-0.5 shrink-0 text-success-emerald" />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-6">
+                    {item.active ? (
+                      <button disabled className="w-full rounded-2xl bg-success-emerald py-4 font-black text-white">✓ {item.activeLabel}</button>
+                    ) : item.loading ? (
+                      <button disabled className="w-full rounded-2xl bg-brand-purple/60 py-4 font-black text-white flex items-center justify-center gap-2"><Loader2 size={18} className="animate-spin" /> Processing exchange</button>
+                    ) : (
+                      <button onClick={() => openConfirmModal(item.type)} className="w-full rounded-2xl premium-button py-4 font-black text-white transition-transform hover:scale-[1.01]">{item.cta} — {item.price} RITUAL</button>
+                    )}
+                  </div>
+
+                  {item.error && (
+                    <div className="mt-4 rounded-2xl border border-gold/25 bg-gold/10 p-4">
+                      <p className="text-sm font-bold text-gold">{item.error}</p>
+                      <button onClick={() => handleSwitchAndRetry(item.type)} className="mt-3 rounded-xl border border-interactive-cyan/40 px-4 py-2 text-sm font-bold text-interactive-cyan">Switch Network</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </section>
+
+          <section className="rounded-[1.5rem] premium-surface p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <Sparkles className="text-interactive-cyan" />
+              <div>
+                <p className="font-black text-text-primary">Free play stays open</p>
+                <p className="text-sm text-text-secondary">Challenges remain playable without purchases; paid items amplify prestige and progress.</p>
+              </div>
+            </div>
+            <span className="rounded-full bg-interactive-cyan/10 px-3 py-1 text-xs font-black text-interactive-cyan">Free · Premium · Ritual-paid</span>
+          </section>
         </div>
       </main>
 

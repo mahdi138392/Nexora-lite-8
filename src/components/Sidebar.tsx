@@ -1,18 +1,22 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { LogOut, Wallet } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { APP_NAV_ITEMS } from '../lib/navigation';
+import { cx } from '../lib/ui';
+
+function shortAddr(address: string) {
+  return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'No wallet';
+}
 
 const Sidebar: React.FC = () => {
-  const { walletAddress, disconnectWallet } = useWallet();
+  const { walletAddress, disconnectWallet, isConnected } = useWallet();
   const { pathname } = useLocation();
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col fixed left-0 top-16 bottom-16 w-60 premium-surface border-r border-white/10 z-40">
-        <nav className="flex-1 py-6 px-3">
+        <nav className="flex-1 py-5 px-3 space-y-1" aria-label="Primary navigation">
           {APP_NAV_ITEMS.map((item) => {
             const isActive = pathname === item.path;
 
@@ -20,52 +24,59 @@ const Sidebar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 transition-all duration-200 ${
+                aria-current={isActive ? 'page' : undefined}
+                className={cx(
+                  'group interactive-lift focus-ring flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold',
                   isActive
-                    ? 'bg-brand-purple/[0.14] border-l-[3px] border-brand-purple text-text-primary shadow-purple-glow'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-white/[0.04] hover:border-l-[3px] hover:border-interactive-cyan/40'
-                }`}
+                    ? 'bg-brand-purple/[0.14] text-text-primary shadow-purple-glow ring-1 ring-brand-purple/25'
+                    : 'text-text-secondary hover:bg-white/[0.04] hover:text-text-primary'
+                )}
               >
-                <item.icon size={20} />
-                <span className="font-medium">{item.label}</span>
+                <span className={cx('flex h-9 w-9 items-center justify-center rounded-xl transition-colors', isActive ? 'bg-brand-purple/20 text-interactive-cyan' : 'bg-white/[0.025] text-text-secondary group-hover:text-interactive-cyan')}>
+                  <item.icon size={18} />
+                </span>
+                <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Wallet Info */}
-        <div className="p-4 border-t border-card">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-text-primary">{walletAddress}</span>
+        <div className="m-3 rounded-2xl border border-white/5 bg-bg-primary/35 p-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Wallet size={16} className={isConnected ? 'text-success-emerald' : 'text-text-secondary'} />
+            <span className="truncate text-xs font-bold text-text-primary">{shortAddr(walletAddress)}</span>
           </div>
-          <button
-            onClick={disconnectWallet}
-            className="flex items-center gap-2 text-text-secondary hover:text-red-400 transition-colors text-sm"
-          >
-            <LogOut size={16} />
-            <span>Disconnect</span>
-          </button>
+          {isConnected && (
+            <button
+              onClick={disconnectWallet}
+              className="focus-ring mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/25 px-3 py-2 text-sm font-bold text-red-300 transition-colors hover:bg-red-500/10"
+            >
+              <LogOut size={15} />
+              Disconnect
+            </button>
+          )}
         </div>
       </aside>
 
-      {/* Mobile Bottom Tab Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 premium-surface border-t border-white/10 z-50 pb-safe">
-        <div className="flex items-center justify-around py-2">
-          {APP_NAV_ITEMS.slice(0, 5).map((item) => {
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 premium-surface border-t border-white/10 z-50 pb-safe" aria-label="Mobile navigation">
+        <div className="flex items-stretch gap-1 overflow-x-auto px-2 py-2">
+          {APP_NAV_ITEMS.map((item) => {
             const isActive = pathname === item.path;
 
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200 ${
+                aria-current={isActive ? 'page' : undefined}
+                className={cx(
+                  'focus-ring flex min-w-[74px] flex-1 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-bold transition-all',
                   isActive
-                    ? 'text-brand-purple'
-                    : 'text-text-secondary'
-                }`}
+                    ? 'bg-brand-purple/15 text-interactive-cyan ring-1 ring-brand-purple/25'
+                    : 'text-text-secondary hover:bg-white/[0.04] hover:text-text-primary'
+                )}
               >
-                <item.icon size={22} />
-                <span className="text-xs font-medium">{item.label}</span>
+                <item.icon size={20} />
+                <span>{item.label}</span>
               </Link>
             );
           })}

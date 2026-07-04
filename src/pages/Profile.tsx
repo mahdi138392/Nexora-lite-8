@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Shield, ShoppingBag, Receipt, ExternalLink, Flame } from 'lucide-react';
+import { Copy, Check, Shield, ShoppingBag, Receipt, ExternalLink, Flame, Crown, Trophy, Sparkles, WalletCards } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { useGame, RANK_COLORS, ACHIEVEMENTS } from '../context/GameContext';
 import { useWallet } from '../context/WalletContext';
@@ -42,21 +42,22 @@ const Profile: React.FC = () => {
   return (
     <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-20 lg:pb-8">
       <Sidebar />
-      <main className="lg:pl-60">
+      <main className="lg:pl-60 product-page-enter">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
           {/* Header */}
-          <div className="bg-card rounded-2xl p-6 lg:p-8 border border-brand-purple/20">
-            <div className="flex flex-col sm:flex-row items-start gap-6">
+          <div className="relative overflow-hidden premium-surface-strong rounded-[2rem] p-6 lg:p-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(155,109,255,0.18),transparent_32%),radial-gradient(circle_at_88%_12%,rgba(251,191,36,0.14),transparent_30%)]" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-start gap-6">
               <div className="flex flex-col items-center flex-shrink-0">
                 {avatarSeed ? (
                   <img
                     src={avatarUrl(avatarSeed)}
                     alt="Avatar"
-                    className="w-20 h-20 rounded-full flex-shrink-0 bg-secondary-layer"
+                    className="w-24 h-24 rounded-3xl flex-shrink-0 bg-secondary-layer ring-2 ring-brand-purple/30"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-gradient-brand flex items-center justify-center text-white text-2xl font-black flex-shrink-0">
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-brand flex items-center justify-center text-white text-2xl font-black flex-shrink-0 ring-2 ring-brand-purple/30">
                     0x
                   </div>
                 )}
@@ -67,9 +68,12 @@ const Profile: React.FC = () => {
                   {avatarSeed ? 'Change Avatar' : 'Choose Avatar'}
                 </button>
               </div>
-              <div>
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 rounded-full bg-brand-purple/10 border border-brand-purple/25 px-3 py-1 text-xs font-black text-brand-purple mb-3">
+                  <Sparkles size={13} /> Collectible player profile
+                </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-text-secondary text-sm break-all">{shortAddr(walletAddress)}</span>
+                  <span className="font-mono text-text-primary text-xl font-black break-all">{shortAddr(walletAddress)}</span>
                   <button onClick={handleCopy} className="bg-secondary-layer rounded-lg p-1.5">
                     {copied ? <Check size={14} className="text-success-emerald" /> : <Copy size={14} className="text-text-secondary" />}
                   </button>
@@ -85,27 +89,39 @@ const Profile: React.FC = () => {
                   )}
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-3 sm:min-w-64">
+                <div className="rounded-2xl bg-bg-primary/35 border border-white/5 p-4">
+                  <WalletCards size={18} className="text-interactive-cyan mb-2" />
+                  <p className="text-xs text-text-secondary">Identity</p>
+                  <p className="font-black text-text-primary">Wallet-bound</p>
+                </div>
+                <div className="rounded-2xl bg-gold/10 border border-gold/25 p-4">
+                  <Crown size={18} className="text-gold mb-2" />
+                  <p className="text-xs text-text-secondary">Status</p>
+                  <p className="font-black text-gold">{gameState.premiumStatus ? 'Premium' : 'Standard'}</p>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-secondary-layer rounded-xl p-4 text-center">
+            <div className="premium-surface rounded-2xl p-4 text-center">
               <p className="font-numeric text-gold font-bold text-lg">⚡ {gameState.totalXP} XP</p>
             </div>
-            <div className="bg-secondary-layer rounded-xl p-4 text-center">
+            <div className="premium-surface rounded-2xl p-4 text-center">
               <p className="font-numeric text-brand-purple font-bold text-lg">Level {gameState.level}</p>
             </div>
-            <div className="bg-secondary-layer rounded-xl p-4 text-center">
+            <div className="premium-surface rounded-2xl p-4 text-center">
               <p className="font-numeric font-bold text-lg" style={{ color: rankColor }}>{gameState.rank}</p>
             </div>
-            <div className="bg-secondary-layer rounded-xl p-4 text-center">
+            <div className="premium-surface rounded-2xl p-4 text-center">
               <p className="font-numeric text-interactive-cyan font-bold text-lg">{gameState.totalChallenges} Done</p>
             </div>
           </div>
 
           {/* Progress */}
-          <div className="bg-card rounded-2xl p-6 border border-brand-purple/15">
+          <div className="premium-surface rounded-[1.5rem] p-6">
             <div className="flex justify-between mb-2">
               <span className="text-text-secondary text-sm">Progress to Next Level</span>
               <span className="text-gold text-sm font-semibold">{gameState.totalXP} / {(gameState.level + 1) * 100} XP</span>
@@ -135,7 +151,7 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Streak */}
-          <div className="bg-card rounded-2xl p-6 border border-brand-purple/15">
+          <div className="premium-surface rounded-[1.5rem] p-6">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
                 <Flame size={28} className="text-orange-500" />
@@ -169,15 +185,15 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Achievements */}
-          <div className="bg-card rounded-2xl p-6 border border-brand-purple/15">
-            <h2 className="font-bold text-xl text-text-primary mb-5">Achievements</h2>
+          <div className="premium-surface rounded-[1.5rem] p-6">
+            <div className="flex items-center justify-between mb-5"><h2 className="font-black text-2xl text-text-primary">Trophy Case</h2><Trophy className="text-gold" /></div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {ACHIEVEMENTS.map((ach) => {
                 const unlocked = gameState.achievements.includes(ach.id);
                 return (
                   <div
                     key={ach.id}
-                    className={`rounded-xl p-4 ${unlocked ? 'bg-gold/5' : 'bg-secondary-layer opacity-50'}`}
+                    className={`rounded-2xl p-4 transition-all ${unlocked ? 'bg-gold/10 shadow-gold-glow' : 'bg-secondary-layer/70 opacity-60'}`}
                     style={{ border: unlocked ? '1px solid rgba(251,191,36,0.5)' : '1px solid rgba(139,92,246,0.1)' }}
                   >
                     <span className={`text-3xl block ${unlocked ? '' : 'grayscale'}`}>{ach.icon}</span>
@@ -192,8 +208,8 @@ const Profile: React.FC = () => {
           </div>
 
           {/* My Items */}
-          <div className="bg-card rounded-2xl p-6 border border-brand-purple/15">
-            <h2 className="font-bold text-xl text-text-primary mb-4">My Items</h2>
+          <div className="premium-surface rounded-[1.5rem] p-6">
+            <h2 className="font-black text-2xl text-text-primary mb-4">Inventory</h2>
             {!gameState.xpBoosterActive && !gameState.premiumStatus ? (
               <div className="text-center py-4">
                 <ShoppingBag size={48} className="text-text-secondary opacity-20 mx-auto mb-3" />
@@ -219,18 +235,18 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Statistics */}
-          <div className="bg-card rounded-2xl p-6 border border-brand-purple/15">
-            <h2 className="font-bold text-xl text-text-primary mb-5">Challenge Statistics</h2>
+          <div className="premium-surface rounded-[1.5rem] p-6">
+            <h2 className="font-black text-2xl text-text-primary mb-5">Performance Map</h2>
             <div className="grid grid-cols-3 gap-3 mb-5">
-              <div className="bg-secondary-layer rounded-xl p-4 text-center">
+              <div className="premium-surface rounded-2xl p-4 text-center">
                 <p className="text-text-primary font-bold">{gameState.totalChallenges}</p>
                 <p className="text-text-secondary text-xs">Total</p>
               </div>
-              <div className="bg-secondary-layer rounded-xl p-4 text-center">
+              <div className="premium-surface rounded-2xl p-4 text-center">
                 <p className="text-success-emerald font-bold">{gameState.correctAnswers}</p>
                 <p className="text-text-secondary text-xs">Correct</p>
               </div>
-              <div className="bg-secondary-layer rounded-xl p-4 text-center">
+              <div className="premium-surface rounded-2xl p-4 text-center">
                 <p className="text-brand-purple font-bold">{Math.round(gameState.accuracy * 100)}%</p>
                 <p className="text-text-secondary text-xs">Accuracy</p>
               </div>
@@ -253,8 +269,8 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Transaction History */}
-          <div className="bg-card rounded-2xl p-6 border border-brand-purple/15">
-            <h2 className="font-bold text-xl text-text-primary mb-5">Transaction History</h2>
+          <div className="premium-surface rounded-[1.5rem] p-6">
+            <h2 className="font-black text-2xl text-text-primary mb-5">Ritual Ledger</h2>
             {gameState.transactions.length === 0 ? (
               <div className="text-center py-4">
                 <Receipt size={40} className="text-text-secondary opacity-20 mx-auto mb-3" />

@@ -1,7 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Star, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Brain,
+  CheckCircle,
+  ChevronRight,
+  CircleDot,
+  Flame,
+  Loader2,
+  Lock,
+  RotateCcw,
+  Shield,
+  Sparkles,
+  Star,
+  Trophy,
+  XCircle,
+  Zap,
+} from 'lucide-react';
 import { BrainIcon, FootballIcon, CircuitIcon } from '../components/CategoryIcons';
-import Logo from '../components/Logo';
 import Sidebar from '../components/Sidebar';
 import { generateQuestion, QuestionData } from '../lib/gemini';
 import { useGame } from '../context/GameContext';
@@ -9,15 +25,25 @@ import type { CategoryType, DifficultyType } from '../context/GameContext';
 
 type ChallengeState = 'category' | 'difficulty' | 'loading' | 'question' | 'correct' | 'wrong';
 
+type ResultMeta = {
+  isCorrect: boolean;
+  xpEarned: number;
+  streakXP: number;
+  streakDay: number;
+};
+
 interface Category {
   id: CategoryType;
   name: string;
+  shortName: string;
+  tagline: string;
   description: string;
-  xpEasy: string;
-  xpMedium: string;
-  xpHard: string;
+  tone: string;
+  gradient: string;
+  xpRange: string;
   icon: React.FC<{ size?: number; color?: string }>;
   iconColor: string;
+  symbol: string;
   hasHighestXP?: boolean;
 }
 
@@ -26,40 +52,59 @@ interface Difficulty {
   name: string;
   xp: number;
   description: string;
-  bgColor: string;
+  stakes: string;
+  pace: string;
   borderColor: string;
+  glow: string;
 }
+
+const STREAK_BONUS: Record<number, number> = {
+  1: 10,
+  2: 20,
+  3: 30,
+  4: 40,
+  5: 50,
+};
 
 const categories: Category[] = [
   {
     id: 'general',
     name: 'General Knowledge',
-    description: 'Test your general knowledge across diverse topics',
-    xpEasy: '10 XP',
-    xpMedium: '20 XP',
-    xpHard: '40 XP',
+    shortName: 'General',
+    tagline: 'The Archive Run',
+    description: 'Science, history, geography, culture, space, art, and famous facts.',
+    tone: 'text-brand-purple',
+    gradient: 'from-brand-purple/24 via-brand-purple/8 to-transparent',
+    xpRange: '10–40 XP',
     icon: BrainIcon,
     iconColor: '#8B5CF6',
+    symbol: '🧠',
   },
   {
     id: 'football',
     name: 'Football',
-    description: 'World Cup, leagues, players, records and history',
-    xpEasy: '10 XP',
-    xpMedium: '20 XP',
-    xpHard: '40 XP',
+    shortName: 'Football',
+    tagline: 'The Arena Trial',
+    description: 'World Cup lore, leagues, players, records, and football history.',
+    tone: 'text-interactive-cyan',
+    gradient: 'from-interactive-cyan/22 via-interactive-cyan/8 to-transparent',
+    xpRange: '10–40 XP',
     icon: FootballIcon,
     iconColor: '#38BDF8',
+    symbol: '⚽',
   },
   {
     id: 'ai',
     name: 'AI & Emerging Technology',
-    description: 'AI, Machine Learning, Web3, Blockchain and the future',
-    xpEasy: '15 XP',
-    xpMedium: '30 XP',
-    xpHard: '60 XP',
+    shortName: 'AI Tech',
+    tagline: 'The Signal Ritual',
+    description: 'AI, machine learning, Web3, blockchain, robotics, and future systems.',
+    tone: 'text-success-emerald',
+    gradient: 'from-success-emerald/22 via-brand-purple/10 to-transparent',
+    xpRange: '15–60 XP',
     icon: CircuitIcon,
     iconColor: '#10B981',
+    symbol: '🤖',
     hasHighestXP: true,
   },
 ];
@@ -67,29 +112,52 @@ const categories: Category[] = [
 const difficulties: Difficulty[] = [
   {
     id: 'easy',
-    name: 'Easy',
+    name: 'Initiate',
     xp: 10,
-    description: 'Great for warming up',
-    bgColor: 'rgba(16, 185, 129, 0.1)',
+    description: 'A clean warm-up with familiar facts and quick confidence.',
+    stakes: 'Low risk',
+    pace: 'Fast read',
     borderColor: '#10B981',
+    glow: 'rgba(16,185,129,0.22)',
   },
   {
     id: 'medium',
-    name: 'Medium',
+    name: 'Adept',
     xp: 20,
-    description: 'Test your knowledge',
-    bgColor: 'rgba(56, 189, 248, 0.1)',
+    description: 'A sharper test that rewards focus and specific knowledge.',
+    stakes: 'Balanced',
+    pace: 'Focused',
     borderColor: '#38BDF8',
+    glow: 'rgba(56,189,248,0.22)',
   },
   {
     id: 'hard',
-    name: 'Hard',
+    name: 'Oracle',
     xp: 40,
-    description: 'For the experts',
-    bgColor: 'rgba(139, 92, 246, 0.1)',
+    description: 'High-intensity questions for expert-level momentum.',
+    stakes: 'High reward',
+    pace: 'Intense',
     borderColor: '#8B5CF6',
+    glow: 'rgba(139,92,246,0.24)',
   },
 ];
+
+const optionKeys = ['A', 'B', 'C', 'D'] as const;
+
+function getAdjustedXP(categoryId: CategoryType | undefined, difficulty: Difficulty) {
+  if (categoryId !== 'ai') return difficulty.xp;
+  if (difficulty.id === 'easy') return 15;
+  if (difficulty.id === 'medium') return 30;
+  return 60;
+}
+
+function getDifficultyLabel(id: DifficultyType) {
+  return difficulties.find((difficulty) => difficulty.id === id)?.name ?? id;
+}
+
+function todayKey() {
+  return new Date().toISOString().split('T')[0];
+}
 
 const Challenge: React.FC = () => {
   const [state, setState] = useState<ChallengeState>('category');
@@ -100,43 +168,39 @@ const Challenge: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [resultMeta, setResultMeta] = useState<ResultMeta | null>(null);
 
-  const { awardXP, addChallenge, checkStreak } = useGame();
+  const { gameState, awardXP, addChallenge, checkStreak } = useGame();
 
-  // Timer — setTimeout chain avoids setInterval memory leak
-  useEffect(() => {
-    if (state !== 'question') return;
-    if (timeLeft <= 0) {
-      handleSubmit();
-      return;
-    }
-    const t = setTimeout(() => setTimeLeft(p => p - 1), 1000);
-    return () => clearTimeout(t);
-  }, [state, timeLeft]);
+  const selectedDifficultyXP = useMemo(
+    () => (selectedDifficulty ? getAdjustedXP(selectedCategory?.id, selectedDifficulty) : 0),
+    [selectedCategory?.id, selectedDifficulty]
+  );
+
+  const resetRound = () => {
+    setSelectedAnswer(null);
+    setCurrentQuestion(null);
+    setResultMeta(null);
+    setTimeLeft(30);
+  };
 
   const handleCategorySelect = (category: Category) => {
     setSelectedCategory(category);
     setState('difficulty');
+    setAiError(null);
   };
 
-  const handleDifficultySelect = async (difficulty: Difficulty) => {
-    let adjustedXP = difficulty.xp;
-    if (selectedCategory?.id === 'ai') {
-      if (difficulty.id === 'easy') adjustedXP = 15;
-      else if (difficulty.id === 'medium') adjustedXP = 30;
-      else adjustedXP = 60;
-    }
+  const handleDifficultySelect = useCallback(async (difficulty: Difficulty) => {
+    if (!selectedCategory) return;
+
+    const adjustedXP = getAdjustedXP(selectedCategory.id, difficulty);
     setSelectedDifficulty({ ...difficulty, xp: adjustedXP });
     setState('loading');
     setAiError(null);
-    setSelectedAnswer(null);
-    setCurrentQuestion(null);
+    resetRound();
 
     try {
-      const q = await generateQuestion(
-        selectedCategory!.id,
-        difficulty.id
-      );
+      const q = await generateQuestion(selectedCategory.id, difficulty.id);
       setCurrentQuestion(q);
       setTimeLeft(30);
       setState('question');
@@ -144,22 +208,21 @@ const Challenge: React.FC = () => {
       setAiError(err instanceof Error ? err.message : 'Failed to generate question.');
       setState('difficulty');
     }
-  };
+  }, [selectedCategory]);
 
-  const handleSubmit = () => {
-    if (!currentQuestion || !selectedCategory || !selectedDifficulty) return;
+  const handleSubmit = useCallback(() => {
+    if (!currentQuestion || !selectedCategory || !selectedDifficulty || isSubmitting) return;
     setIsSubmitting(true);
 
     const answerKey = selectedAnswer !== null
       ? String.fromCharCode(65 + selectedAnswer) as 'A' | 'B' | 'C' | 'D'
       : null;
     const isCorrect = answerKey !== null && answerKey === currentQuestion.correct;
+    const shouldAwardStreak = isCorrect && gameState.lastActiveDate !== todayKey();
+    const nextStreakDay = shouldAwardStreak ? (gameState.streak % 5) + 1 : gameState.streak;
+    const streakXP = shouldAwardStreak ? STREAK_BONUS[nextStreakDay] ?? 10 : 0;
 
-    const xpEarned = awardXP(
-      selectedCategory.id,
-      selectedDifficulty.id,
-      isCorrect
-    );
+    const xpEarned = awardXP(selectedCategory.id, selectedDifficulty.id, isCorrect);
 
     addChallenge({
       id: Date.now().toString(),
@@ -172,27 +235,50 @@ const Challenge: React.FC = () => {
 
     if (isCorrect) checkStreak();
 
+    setResultMeta({ isCorrect, xpEarned, streakXP, streakDay: nextStreakDay });
+
     setTimeout(() => {
       setState(isCorrect ? 'correct' : 'wrong');
       setIsSubmitting(false);
-    }, 400);
-  };
+    }, 420);
+  }, [
+    addChallenge,
+    awardXP,
+    checkStreak,
+    currentQuestion,
+    gameState.lastActiveDate,
+    gameState.streak,
+    isSubmitting,
+    selectedAnswer,
+    selectedCategory,
+    selectedDifficulty,
+  ]);
+
+  useEffect(() => {
+    if (state !== 'question') return;
+    if (timeLeft <= 0) {
+      handleSubmit();
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft((previous) => previous - 1), 1000);
+    return () => clearTimeout(t);
+  }, [handleSubmit, state, timeLeft]);
 
   const handleBack = () => {
     if (state === 'difficulty') {
       setState('category');
       setSelectedCategory(null);
       setAiError(null);
+      resetRound();
     } else if (state === 'question' || state === 'loading') {
       setState('difficulty');
-      setSelectedAnswer(null);
-      setTimeLeft(30);
+      resetRound();
     }
   };
 
   const handleNextChallenge = () => {
     if (selectedDifficulty) {
-      handleDifficultySelect(selectedDifficulty);
+      void handleDifficultySelect(selectedDifficulty);
     }
   };
 
@@ -200,216 +286,213 @@ const Challenge: React.FC = () => {
     setState('category');
     setSelectedCategory(null);
     setSelectedDifficulty(null);
-    setSelectedAnswer(null);
-    setCurrentQuestion(null);
     setAiError(null);
+    resetRound();
   };
 
-  // STATE 1: Category Selection
-  const renderCategorySelection = () => (
-    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="font-heading text-3xl lg:text-4xl font-bold text-text-primary text-center mb-4 tracking-[-0.03em]">
-          Choose Your Challenge
+  const renderShell = (children: React.ReactNode, className = 'max-w-5xl') => (
+    <div className="min-h-screen bg-transparent px-4 pb-8 pt-4 lg:pt-0">
+      <div className={`${className} mx-auto`}>{children}</div>
+    </div>
+  );
+
+  const renderCategorySelection = () => renderShell(
+    <div className="space-y-8">
+      <div className="text-center max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 rounded-full premium-badge px-4 py-2 text-xs font-black text-interactive-cyan mb-4">
+          <Sparkles size={14} /> Core ritual
+        </div>
+        <h1 className="text-4xl lg:text-6xl font-black text-text-primary">
+          Select your game mode
         </h1>
-        <p className="text-text-secondary text-center mb-10">
-          Select a category to begin your knowledge test
+        <p className="mt-4 text-text-secondary text-base lg:text-lg">
+          Pick a ritual lane. Gemini will forge one live question, your answer decides XP, streak momentum, and profile growth.
         </p>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => handleCategorySelect(category)}
-              className="relative group bg-card rounded-2xl p-6 lg:p-8 border-2 text-left transition-all duration-300 hover:scale-[1.02] hover:border-brand-purple/50"
-              style={{
-                borderColor: category.hasHighestXP
-                  ? 'rgba(139, 92, 246, 0.5)'
-                  : 'rgba(139, 92, 246, 0.3)',
-              }}
-            >
-              {category.hasHighestXP && (
-                <div className="absolute -top-3 -right-3 px-3 py-1 bg-gold rounded-full text-xs font-bold text-bg-primary">
-                  HIGHEST XP
-                </div>
-              )}
-
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-transform group-hover:scale-110"
-                style={{ backgroundColor: `${category.iconColor}20` }}
-              >
-                <category.icon size={28} color={category.iconColor} />
-              </div>
-
-              <h3 className="text-xl font-bold text-text-primary mb-2">
-                {category.name}
-              </h3>
-              <p className="text-text-secondary text-sm mb-4">
-                {category.description}
-              </p>
-              <div className="text-xs text-text-secondary">
-                Easy {category.xpEasy} | Medium {category.xpMedium} | Hard {category.xpHard}
-              </div>
-            </button>
-          ))}
-        </div>
       </div>
-    </div>
-  );
 
-  // STATE 2: Difficulty Selection
-  const renderDifficultySelection = () => (
-    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-text-secondary hover:text-text-primary mb-6 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          <span>Back</span>
-        </button>
-
-        <h2 className="text-2xl lg:text-3xl font-bold text-text-primary mb-2">
-          {selectedCategory?.name}
-        </h2>
-        <p className="text-text-secondary mb-6">Select your difficulty level</p>
-
-        {aiError && (
-          <div
-            className="mb-6 p-4 rounded-xl text-sm text-red-400"
-            style={{ backgroundColor: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}
+      <div className="grid gap-5 md:grid-cols-3">
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => handleCategorySelect(category)}
+            className="group relative overflow-hidden rounded-[1.75rem] premium-surface p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 focus-visible:scale-[1.01]"
           >
-            {aiError}
-          </div>
-        )}
-
-        <div className="space-y-4">
-          {difficulties.map((difficulty) => {
-            let adjustedXP = difficulty.xp;
-            if (selectedCategory?.id === 'ai') {
-              if (difficulty.id === 'easy') adjustedXP = 15;
-              else if (difficulty.id === 'medium') adjustedXP = 30;
-              else adjustedXP = 60;
-            }
-
-            return (
-              <button
-                key={difficulty.id}
-                onClick={() => handleDifficultySelect({ ...difficulty, xp: adjustedXP })}
-                className="w-full p-5 rounded-xl text-left transition-all duration-200 hover:scale-[1.01]"
-                style={{
-                  backgroundColor: difficulty.bgColor,
-                  border: `2px solid ${difficulty.borderColor}`,
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-xl font-bold text-text-primary mb-1">
-                      {difficulty.name}
-                    </div>
-                    <div className="text-sm text-text-secondary">
-                      {difficulty.description}
-                    </div>
+            <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient}`} />
+            <div className="relative z-10 flex h-full min-h-[320px] flex-col justify-between gap-8">
+              <div>
+                <div className="mb-5 flex items-start justify-between gap-3">
+                  <div
+                    className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-bg-primary/40 shadow-2xl transition-transform duration-300 group-hover:scale-110"
+                    style={{ boxShadow: `0 18px 50px ${category.iconColor}24` }}
+                  >
+                    <category.icon size={34} color={category.iconColor} />
+                    <span className="absolute -right-2 -top-2 text-2xl">{category.symbol}</span>
                   </div>
-                  <div className="text-xl font-bold" style={{ color: difficulty.borderColor }}>
-                    +{adjustedXP} XP
-                  </div>
+                  {category.hasHighestXP && (
+                    <span className="rounded-full bg-gold px-3 py-1 text-[10px] font-black text-bg-primary shadow-gold-glow">
+                      HIGHEST XP
+                    </span>
+                  )}
                 </div>
-              </button>
-            );
-          })}
-        </div>
+                <p className={`eyebrow-label text-xs ${category.tone}`}>{category.tagline}</p>
+                <h2 className="mt-2 text-2xl font-black text-text-primary">{category.name}</h2>
+                <p className="mt-3 text-sm text-text-secondary">{category.description}</p>
+              </div>
+
+              <div>
+                <div className="mb-4 grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="rounded-xl bg-bg-primary/35 p-2 text-text-secondary">Easy<br /><span className="font-black text-text-primary">{category.id === 'ai' ? '15' : '10'} XP</span></div>
+                  <div className="rounded-xl bg-bg-primary/35 p-2 text-text-secondary">Med<br /><span className="font-black text-text-primary">{category.id === 'ai' ? '30' : '20'} XP</span></div>
+                  <div className="rounded-xl bg-bg-primary/35 p-2 text-text-secondary">Hard<br /><span className="font-black text-text-primary">{category.id === 'ai' ? '60' : '40'} XP</span></div>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl bg-bg-primary/40 px-4 py-3">
+                  <span className="text-sm font-bold text-text-primary">Enter mode</span>
+                  <span className={`flex items-center gap-1 text-sm font-black ${category.tone}`}>{category.xpRange} <ChevronRight size={16} /></span>
+                </div>
+              </div>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
 
-  // STATE 3: Loading
-  const renderLoading = () => (
-    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4 flex items-center justify-center">
-      <div className="bg-card rounded-2xl p-10 text-center">
-        <div className="mb-6 animate-spin">
-          <Logo size={60} />
-        </div>
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <Loader2 size={20} className="text-brand-purple animate-spin" />
-          <span className="text-text-primary font-medium">AI is generating your question...</span>
-        </div>
-        <div className="h-2 w-48 bg-secondary-layer rounded-full overflow-hidden mx-auto">
-          <div className="h-full bg-gradient-brand rounded-full animate-pulse" style={{ width: '60%' }} />
-        </div>
-        {aiError && (
-          <div className="mt-6 text-center">
-            <p className="text-red-400 text-sm mb-3">{aiError}</p>
-            <button
-              onClick={() => selectedDifficulty && handleDifficultySelect(selectedDifficulty)}
-              className="px-4 py-2 bg-brand-purple text-white rounded-xl text-sm font-medium"
-            >
-              Try Again
-            </button>
+  const renderDifficultySelection = () => renderShell(
+    <div className="max-w-4xl mx-auto space-y-6">
+      <button
+        onClick={handleBack}
+        className="inline-flex items-center gap-2 text-sm font-bold text-text-secondary transition-colors hover:text-text-primary"
+      >
+        <ArrowLeft size={18} /> Change mode
+      </button>
+
+      <div className="overflow-hidden rounded-[2rem] premium-surface-strong p-6 lg:p-8">
+        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <div>
+            <div className="mb-4 flex items-center gap-4">
+              <div
+                className="flex h-16 w-16 items-center justify-center rounded-2xl bg-bg-primary/40"
+                style={{ boxShadow: `0 18px 50px ${selectedCategory?.iconColor}28` }}
+              >
+                {selectedCategory && <selectedCategory.icon size={34} color={selectedCategory.iconColor} />}
+              </div>
+              <div>
+                <p className={`eyebrow-label text-xs ${selectedCategory?.tone}`}>{selectedCategory?.tagline}</p>
+                <h1 className="text-3xl font-black text-text-primary">{selectedCategory?.shortName}</h1>
+              </div>
+            </div>
+            <p className="text-text-secondary">Choose the intensity of this ritual. Higher tiers demand more precision and pay out more XP.</p>
           </div>
-        )}
+
+          <div className="grid gap-3">
+            {difficulties.map((difficulty) => {
+              const adjustedXP = getAdjustedXP(selectedCategory?.id, difficulty);
+              return (
+                <button
+                  key={difficulty.id}
+                  onClick={() => void handleDifficultySelect({ ...difficulty, xp: adjustedXP })}
+                  className="group rounded-2xl border bg-bg-primary/30 p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/[0.035]"
+                  style={{ borderColor: `${difficulty.borderColor}66`, boxShadow: `0 18px 45px ${difficulty.glow}` }}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary-layer">
+                        {difficulty.id === 'easy' && <Shield size={22} style={{ color: difficulty.borderColor }} />}
+                        {difficulty.id === 'medium' && <Zap size={22} style={{ color: difficulty.borderColor }} />}
+                        {difficulty.id === 'hard' && <Trophy size={22} style={{ color: difficulty.borderColor }} />}
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-xl font-black text-text-primary">{difficulty.name}</h2>
+                          <span className="rounded-full bg-secondary-layer px-2 py-0.5 text-[10px] font-black text-text-secondary">{difficulty.stakes}</span>
+                        </div>
+                        <p className="mt-1 text-sm text-text-secondary">{difficulty.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="stat-number text-3xl font-black" style={{ color: difficulty.borderColor }}>+{adjustedXP}</p>
+                      <p className="text-xs font-bold text-text-secondary">XP · {difficulty.pace}</p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
+
+      {aiError && (
+        <div className="rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-300">
+          <span className="font-bold">Signal interrupted.</span> {aiError}
+        </div>
+      )}
     </div>
   );
 
-  // STATE 4: Active Question
+  const renderLoading = () => renderShell(
+    <div className="flex min-h-[70vh] items-center justify-center">
+      <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] premium-surface-strong p-8 text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(55,213,255,0.16),transparent_42%)]" />
+        <div className="relative z-10">
+          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full border border-brand-purple/30 bg-brand-purple/10">
+            <Loader2 size={44} className="animate-spin text-interactive-cyan" />
+          </div>
+          <p className="eyebrow-label text-interactive-cyan text-xs">Gemini ritual in progress</p>
+          <h2 className="mt-2 text-3xl font-black text-text-primary">Forging your question</h2>
+          <p className="mx-auto mt-3 max-w-md text-sm text-text-secondary">
+            Calibrating category, difficulty, plausible answers, and explanation. Stay locked in.
+          </p>
+          <div className="mt-7 grid grid-cols-3 gap-3 text-left text-xs text-text-secondary">
+            <div className="rounded-2xl bg-bg-primary/40 p-3"><CircleDot size={16} className="mb-2 text-brand-purple" /> Mode<br /><span className="font-black text-text-primary">{selectedCategory?.shortName}</span></div>
+            <div className="rounded-2xl bg-bg-primary/40 p-3"><Lock size={16} className="mb-2 text-interactive-cyan" /> Tier<br /><span className="font-black text-text-primary">{selectedDifficulty && getDifficultyLabel(selectedDifficulty.id)}</span></div>
+            <div className="rounded-2xl bg-bg-primary/40 p-3"><Star size={16} className="mb-2 text-gold" /> Reward<br /><span className="font-black text-text-primary">+{selectedDifficultyXP} XP</span></div>
+          </div>
+          <div className="mt-6 h-2 overflow-hidden rounded-full bg-secondary-layer">
+            <div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-brand" />
+          </div>
+        </div>
+      </div>
+    </div>,
+    'max-w-3xl'
+  );
+
   const renderQuestion = () => {
     const progress = (timeLeft / 30) * 100;
     const circumference = 2 * Math.PI * 45;
     const strokeDashoffset = circumference - (progress / 100) * circumference;
-    const optionKeys = ['A', 'B', 'C', 'D'] as const;
+    const timerColor = timeLeft <= 8 ? '#EF4444' : timeLeft <= 15 ? '#FBBF24' : '#38BDF8';
 
-    return (
-      <div className="min-h-screen bg-transparent pt-20 pb-8 px-4">
-        <div className="max-w-[680px] mx-auto">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-text-secondary hover:text-text-primary mb-6 transition-colors"
-          >
-            <ArrowLeft size={20} />
-            <span>Back</span>
-          </button>
+    return renderShell(
+      <div className="max-w-3xl mx-auto space-y-5">
+        <button
+          onClick={handleBack}
+          className="inline-flex items-center gap-2 text-sm font-bold text-text-secondary transition-colors hover:text-text-primary"
+        >
+          <ArrowLeft size={18} /> Recalibrate
+        </button>
 
-          {/* Top Bar */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="px-3 py-1.5 bg-secondary-layer rounded-full text-sm font-medium text-text-primary">
-              {selectedCategory?.name}
-            </div>
-            <div
-              className="px-3 py-1.5 rounded-full text-sm font-bold"
-              style={{
-                backgroundColor: `${selectedDifficulty?.borderColor}20`,
-                color: selectedDifficulty?.borderColor,
-              }}
-            >
-              {selectedDifficulty?.name?.toUpperCase()}
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/20 rounded-full">
-              <Star size={16} className="text-gold" fill="currentColor" />
-              <span className="text-sm font-bold text-gold">+{selectedDifficulty?.xp} XP</span>
-            </div>
-          </div>
+        <div className="grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
+          <div className="rounded-2xl premium-surface px-3 py-3 font-bold text-text-primary">{selectedCategory?.shortName}</div>
+          <div className="rounded-2xl premium-surface px-3 py-3 font-bold text-text-primary">{selectedDifficulty && getDifficultyLabel(selectedDifficulty.id)}</div>
+          <div className="rounded-2xl border border-gold/25 bg-gold/10 px-3 py-3 font-black text-gold">+{selectedDifficultyXP} XP</div>
+        </div>
 
-          {/* Timer and Question */}
-          <div className="bg-card rounded-2xl p-6 lg:p-8">
-            {/* Timer */}
-            <div className="flex justify-center mb-6">
-              <div className="relative w-24 h-24">
-                <svg className="w-full h-full transform -rotate-90">
+        <div className="overflow-hidden rounded-[2rem] premium-surface-strong">
+          <div className="border-b border-white/5 p-5 sm:p-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="eyebrow-label text-interactive-cyan text-xs">Live question</p>
+                <h1 className="mt-2 text-2xl font-black text-text-primary">Answer before the signal closes</h1>
+              </div>
+              <div className="relative mx-auto h-24 w-24 shrink-0 sm:mx-0">
+                <svg className="h-full w-full -rotate-90 transform">
+                  <circle cx="48" cy="48" r="45" stroke="rgba(39,52,73,0.95)" strokeWidth="7" fill="none" />
                   <circle
                     cx="48"
                     cy="48"
                     r="45"
-                    stroke="#273449"
-                    strokeWidth="6"
-                    fill="none"
-                  />
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r="45"
-                    stroke="#38BDF8"
-                    strokeWidth="6"
+                    stroke={timerColor}
+                    strokeWidth="7"
                     fill="none"
                     strokeLinecap="round"
                     strokeDasharray={circumference}
@@ -417,162 +500,141 @@ const Challenge: React.FC = () => {
                     className="transition-all duration-1000"
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-text-primary">{timeLeft}</span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="stat-number text-3xl font-black text-text-primary">{timeLeft}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">sec</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Question Text */}
-            <h3 className="text-lg lg:text-xl font-semibold text-text-primary text-center mb-8 leading-relaxed">
+          <div className="p-5 sm:p-7">
+            <h2 className="text-xl font-bold leading-relaxed text-text-primary sm:text-2xl">
               {currentQuestion?.question ?? 'Loading...'}
-            </h3>
+            </h2>
 
-            {/* Answer Options */}
-            <div className="space-y-3">
-              {optionKeys.map((key, index) => (
-                <button
-                  key={key}
-                  onClick={() => setSelectedAnswer(index)}
-                  className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-4 ${
-                    selectedAnswer === index
-                      ? 'bg-interactive-cyan/10 border-2 border-interactive-cyan'
-                      : 'bg-secondary-layer border-2 border-transparent hover:border-brand-purple'
-                  }`}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                      selectedAnswer === index
-                        ? 'bg-interactive-cyan text-bg-primary'
-                        : 'bg-card text-text-secondary'
+            <div className="mt-7 space-y-3">
+              {optionKeys.map((key, index) => {
+                const isSelected = selectedAnswer === index;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedAnswer(index)}
+                    disabled={isSubmitting}
+                    className={`group flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-200 ${
+                      isSelected
+                        ? 'border-interactive-cyan bg-interactive-cyan/10 shadow-[0_0_0_4px_rgba(56,189,248,0.10)]'
+                        : 'border-white/5 bg-secondary-layer/80 hover:border-brand-purple/45 hover:bg-white/[0.035]'
                     }`}
                   >
-                    {key}
-                  </div>
-                  <span className="text-text-primary">{currentQuestion?.options[key]}</span>
-                </button>
-              ))}
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-black ${isSelected ? 'bg-interactive-cyan text-bg-primary' : 'bg-bg-primary/50 text-text-secondary group-hover:text-text-primary'}`}>
+                      {key}
+                    </div>
+                    <span className="font-medium text-text-primary">{currentQuestion?.options[key]}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Submit Button */}
             <button
               onClick={handleSubmit}
               disabled={selectedAnswer === null || isSubmitting}
-              className={`w-full mt-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 ${
+              className={`mt-7 flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-black text-white transition-all duration-200 ${
                 selectedAnswer === null
-                  ? 'bg-secondary-layer cursor-not-allowed'
-                  : 'bg-gradient-brand hover:scale-[1.01] hover:shadow-lg'
+                  ? 'cursor-not-allowed bg-secondary-layer text-text-secondary'
+                  : 'premium-button hover:scale-[1.01]'
               }`}
             >
-              {isSubmitting ? 'Checking...' : 'Submit Answer'}
+              {isSubmitting ? <><Loader2 size={18} className="animate-spin" /> Resolving answer</> : <>Lock answer <ArrowRight size={18} /></>}
             </button>
           </div>
         </div>
-      </div>
+      </div>,
+      'max-w-4xl'
     );
   };
 
-  // STATE 5: Correct Result
-  const renderCorrect = () => (
-    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4 flex items-center justify-center">
-      <div className="max-w-[680px] w-full">
-        <div className="bg-card rounded-2xl p-8 lg:p-10 text-center">
-          <div className="mb-6 animate-bounce">
-            <CheckCircle size={80} className="text-success-emerald mx-auto" />
+  const renderResult = (isCorrect: boolean) => {
+    const correctAnswer = currentQuestion ? currentQuestion.options[currentQuestion.correct] : '';
+    const earnedXP = resultMeta?.xpEarned ?? 0;
+    const streakXP = resultMeta?.streakXP ?? 0;
+
+    return renderShell(
+      <div className="flex min-h-[72vh] items-center justify-center">
+        <div className={`w-full max-w-3xl overflow-hidden rounded-[2rem] premium-surface-strong ${isCorrect ? 'border-success-emerald/30' : 'border-red-500/25'}`}>
+          <div className={`p-7 text-center sm:p-9 ${isCorrect ? 'bg-success-emerald/5' : 'bg-red-500/5'}`}>
+            <div className={`mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full ${isCorrect ? 'bg-success-emerald/15 text-success-emerald' : 'bg-red-500/15 text-red-400'}`}>
+              {isCorrect ? <CheckCircle size={58} /> : <XCircle size={58} />}
+            </div>
+            <p className={`eyebrow-label text-xs ${isCorrect ? 'text-success-emerald' : 'text-red-400'}`}>{isCorrect ? 'Ritual complete' : 'Ritual failed'}</p>
+            <h1 className="mt-2 text-4xl font-black text-text-primary">{isCorrect ? 'Correct signal' : 'Signal missed'}</h1>
+            <p className="mx-auto mt-3 max-w-xl text-text-secondary">
+              {isCorrect ? 'Your profile gains momentum. Bank the XP, protect the streak, and keep climbing.' : 'No XP this round. Study the explanation and re-enter the ritual with sharper focus.'}
+            </p>
           </div>
 
-          <h2 className="text-3xl font-bold text-success-emerald mb-2">Correct!</h2>
-
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Star size={28} className="text-gold" fill="currentColor" />
-            <span className="text-2xl font-bold text-gold animate-pulse">
-              +{selectedDifficulty?.xp} XP Earned
-            </span>
-          </div>
-
-          <div className="bg-success-emerald/10 rounded-xl p-4 mb-3">
-            <div className="text-sm text-text-secondary mb-1">Correct Answer:</div>
-            <div className="text-text-primary font-medium">
-              {currentQuestion && currentQuestion.options[currentQuestion.correct]}
+          <div className="grid gap-4 p-5 sm:grid-cols-3 sm:p-6">
+            <div className="rounded-2xl bg-bg-primary/35 p-4 text-center">
+              <Star size={22} className="mx-auto mb-2 text-gold" fill="currentColor" />
+              <p className="text-xs text-text-secondary">XP gained</p>
+              <p className="stat-number mt-1 text-3xl font-black text-gold">+{earnedXP}</p>
+            </div>
+            <div className="rounded-2xl bg-bg-primary/35 p-4 text-center">
+              <Flame size={22} className="mx-auto mb-2 text-orange-400" />
+              <p className="text-xs text-text-secondary">Streak reward</p>
+              <p className="stat-number mt-1 text-3xl font-black text-orange-400">+{streakXP}</p>
+            </div>
+            <div className="rounded-2xl bg-bg-primary/35 p-4 text-center">
+              <Brain size={22} className="mx-auto mb-2 text-interactive-cyan" />
+              <p className="text-xs text-text-secondary">Tier cleared</p>
+              <p className="mt-1 text-lg font-black text-text-primary">{selectedDifficulty && getDifficultyLabel(selectedDifficulty.id)}</p>
             </div>
           </div>
 
-          <p className="text-text-secondary text-sm mb-8">
-            {currentQuestion?.explanation}
-          </p>
+          <div className="px-5 pb-6 sm:px-6">
+            <div className="rounded-2xl border border-white/5 bg-secondary-layer/70 p-5">
+              <p className="eyebrow-label text-xs text-text-secondary">Correct answer</p>
+              <p className="mt-2 font-black text-text-primary">{currentQuestion?.correct}. {correctAnswer}</p>
+              <div className="my-4 h-px bg-white/5" />
+              <p className="text-sm leading-relaxed text-text-secondary">{currentQuestion?.explanation}</p>
+              {isCorrect && streakXP > 0 && (
+                <p className="mt-4 rounded-xl bg-orange-500/10 px-4 py-3 text-sm font-bold text-orange-300">
+                  Day {resultMeta?.streakDay} streak activated for +{streakXP} bonus XP.
+                </p>
+              )}
+            </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleNextChallenge}
-              className="flex-1 py-3 premium-button text-white rounded-xl font-semibold transition-all"
-            >
-              Next Challenge
-            </button>
-            <button
-              onClick={handleGoToDashboard}
-              className="flex-1 py-3 border-2 border-secondary-layer hover:border-brand-purple text-text-primary rounded-xl font-semibold transition-all"
-            >
-              Go to Dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // STATE 6: Wrong Result
-  const renderWrong = () => (
-    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4 flex items-center justify-center">
-      <div className="max-w-[680px] w-full">
-        <div className="bg-card rounded-2xl p-8 lg:p-10 text-center">
-          <div className="mb-6">
-            <XCircle size={80} className="text-red-500 mx-auto" />
-          </div>
-
-          <h2 className="text-3xl font-bold text-red-500 mb-2">Not quite right</h2>
-
-          <p className="text-text-secondary mb-6">No XP earned this time</p>
-
-          <div className="bg-success-emerald/10 rounded-xl p-4 mb-3">
-            <div className="text-sm text-text-secondary mb-1">Correct Answer:</div>
-            <div className="text-text-primary font-medium">
-              {currentQuestion && currentQuestion.options[currentQuestion.correct]}
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={handleNextChallenge}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl premium-button py-4 font-black text-white transition-transform hover:scale-[1.01]"
+              >
+                {isCorrect ? 'Continue ritual' : 'Try again'} <RotateCcw size={18} />
+              </button>
+              <button
+                onClick={handleGoToDashboard}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 py-4 font-black text-text-primary transition-colors hover:border-brand-purple/45 hover:bg-white/[0.03]"
+              >
+                Choose new mode <ArrowRight size={18} />
+              </button>
             </div>
           </div>
-
-          <p className="text-text-secondary text-sm mb-8">
-            {currentQuestion?.explanation}
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleNextChallenge}
-              className="flex-1 py-3 premium-button text-white rounded-xl font-semibold transition-all"
-            >
-              Try Again
-            </button>
-            <button
-              onClick={handleGoToDashboard}
-              className="flex-1 py-3 border-2 border-secondary-layer hover:border-brand-purple text-text-primary rounded-xl font-semibold transition-all"
-            >
-              Choose Category
-            </button>
-          </div>
         </div>
-      </div>
-    </div>
-  );
+      </div>,
+      'max-w-4xl'
+    );
+  };
 
   return (
     <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-24 lg:pb-8">
       <Sidebar />
-      <main className="lg:pl-60">
+      <main className="lg:pl-60 product-page-enter">
         {state === 'category' && renderCategorySelection()}
         {state === 'difficulty' && renderDifficultySelection()}
         {state === 'loading' && renderLoading()}
         {state === 'question' && renderQuestion()}
-        {state === 'correct' && renderCorrect()}
-        {state === 'wrong' && renderWrong()}
+        {state === 'correct' && renderResult(true)}
+        {state === 'wrong' && renderResult(false)}
       </main>
     </div>
   );

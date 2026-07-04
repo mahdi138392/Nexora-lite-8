@@ -1,5 +1,6 @@
 import React, { type ReactNode } from 'react';
 import Sidebar from '../Sidebar';
+import { cx } from '../../lib/ui';
 
 interface AppShellProps {
   children: ReactNode;
@@ -19,10 +20,10 @@ const AppShell: React.FC<AppShellProps> = ({
   maxWidth = '5xl',
   className = '',
 }) => (
-  <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-20 lg:pb-8">
+  <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-24 lg:pb-8">
     <Sidebar />
-    <main className="lg:pl-60">
-      <div className={`${maxWidthClasses[maxWidth]} mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
+    <main className="lg:pl-60 product-page-enter">
+      <div className={cx(maxWidthClasses[maxWidth], 'mx-auto px-4 sm:px-6 lg:px-8', className)}>
         {children}
       </div>
     </main>

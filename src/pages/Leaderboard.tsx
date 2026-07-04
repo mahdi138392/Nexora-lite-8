@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Crown, Medal, Award } from 'lucide-react';
+import { Crown, Medal, Award, Star, Trophy, Sparkles, UserRound, Timer } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useGame, RANK_COLORS } from '../context/GameContext';
 import { getLeaderboardDB, getUserPositionDB } from '../lib/database';
 import Sidebar from '../components/Sidebar';
+import { Skeleton } from '../components/ui/ProductUI';
 
 interface LBRow {
   wallet_address: string;
@@ -13,27 +14,45 @@ interface LBRow {
   premium_status: boolean;
 }
 
+type LeaderboardTab = 'daily' | 'weekly' | 'alltime';
+
 const MOCK: LBRow[] = [
   { wallet_address: '0xA3f2000000000000000000000000000000B891', total_xp: 4250, level: 42, rank: 'Gold', premium_status: true },
   { wallet_address: '0x7B2c0000000000000000000000000000000D445', total_xp: 3890, level: 38, rank: 'Gold', premium_status: false },
   { wallet_address: '0x9E1d0000000000000000000000000000000A223', total_xp: 3100, level: 31, rank: 'Silver', premium_status: true },
   { wallet_address: '0xF4a10000000000000000000000000000000C667', total_xp: 2540, level: 25, rank: 'Silver', premium_status: false },
   { wallet_address: '0x2D8b0000000000000000000000000000000E112', total_xp: 2100, level: 21, rank: 'Silver', premium_status: true },
-  { wallet_address: '0x6C3e0000000000000000000000000000000 9934', total_xp: 1780, level: 17, rank: 'Bronze', premium_status: false },
+  { wallet_address: '0x6C3e00000000000000000000000000000009934', total_xp: 1780, level: 17, rank: 'Bronze', premium_status: false },
   { wallet_address: '0xB1f70000000000000000000000000000007723', total_xp: 1420, level: 14, rank: 'Bronze', premium_status: false },
   { wallet_address: '0x3A9d0000000000000000000000000000005581', total_xp: 980, level: 9, rank: 'Bronze', premium_status: false },
   { wallet_address: '0xE5c20000000000000000000000000000001199', total_xp: 650, level: 6, rank: 'Beginner', premium_status: false },
   { wallet_address: '0x8D4f0000000000000000000000000000008845', total_xp: 320, level: 3, rank: 'Beginner', premium_status: false },
 ];
 
+const tabs: Array<{ id: LeaderboardTab; label: string; hint: string }> = [
+  { id: 'daily', label: 'Daily', hint: 'Hot streaks' },
+  { id: 'weekly', label: 'Weekly', hint: 'Season push' },
+  { id: 'alltime', label: 'All-time', hint: 'Legacy' },
+];
+
+const podiumMeta = [
+  { place: 1, label: 'Apex', icon: Crown, color: '#FBBF24', height: 'h-36', order: 'md:order-2' },
+  { place: 2, label: 'Vanguard', icon: Medal, color: '#C0C0C0', height: 'h-28', order: 'md:order-1' },
+  { place: 3, label: 'Challenger', icon: Award, color: '#B87333', height: 'h-24', order: 'md:order-3' },
+];
+
 function shortAddr(a: string) {
-  return a.length > 10 ? a.slice(0, 6) + '...' + a.slice(-4) : a;
+  return a.length > 10 ? `${a.slice(0, 6)}...${a.slice(-4)}` : a;
+}
+
+function initials(address: string) {
+  return shortAddr(address).slice(2, 4).toUpperCase();
 }
 
 const Leaderboard: React.FC = () => {
   const [data, setData] = useState<LBRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'weekly' | 'alltime'>('alltime');
+  const [tab, setTab] = useState<LeaderboardTab>('alltime');
   const [userPos, setUserPos] = useState(0);
   const { walletAddress, isConnected } = useWallet();
   const { gameState } = useGame();
@@ -41,7 +60,8 @@ const Leaderboard: React.FC = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const rows = (await getLeaderboardDB(tab)) as LBRow[];
+      const dbTab = tab === 'daily' ? 'weekly' : tab;
+      const rows = (await getLeaderboardDB(dbTab)) as LBRow[];
       setData(rows.length > 0 ? rows : MOCK);
       if (isConnected && walletAddress) {
         const pos = await getUserPositionDB(walletAddress);
@@ -61,130 +81,119 @@ const Leaderboard: React.FC = () => {
   }, [fetchData]);
 
   const top3 = data.slice(0, 3);
-  const rest = data.slice(3, 10);
+  const rest = data.slice(3, 12);
 
   return (
-    <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-24 lg:pb-8">
+    <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-28 lg:pb-10">
       <Sidebar />
-      <main className="lg:pl-60 px-4">
-        <div className="max-w-4xl mx-auto">
-        <h1 className="font-heading text-4xl font-extrabold text-text-primary text-center tracking-[-0.03em]">Leaderboard</h1>
-        <p className="text-text-secondary text-center mt-2 mb-8">
-          Compete with the best. Prove your knowledge.
-        </p>
-
-        <div className="flex justify-center mb-10">
-          <div className="bg-secondary-layer rounded-xl p-1 flex">
-            {(['alltime', 'weekly'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                  tab === t ? 'bg-brand-purple text-white' : 'text-text-secondary'
-                }`}
-              >
-                {t === 'alltime' ? 'All-Time' : 'Weekly'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-14 bg-card rounded-xl animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <>
-            {/* Podium */}
-            <div className="flex items-end justify-center gap-3 sm:gap-6 mb-10">
-              {top3[1] && (
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center text-white font-bold mb-2">
-                    {shortAddr(top3[1].wallet_address).slice(0, 2)}
-                  </div>
-                  <p className="text-xs text-text-secondary mb-1">{shortAddr(top3[1].wallet_address)}</p>
-                  <p className="text-sm font-bold" style={{ color: '#C0C0C0' }}>{top3[1].total_xp} XP</p>
-                  <div className="w-24 h-24 rounded-t-xl mt-2 flex items-start justify-center pt-3"
-                    style={{ background: 'rgba(192,192,192,0.1)', border: '2px solid rgba(192,192,192,0.3)' }}>
-                    <Medal size={28} color="#C0C0C0" />
-                  </div>
+      <main className="lg:pl-60 px-4 product-page-enter">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <section className="relative overflow-hidden rounded-[2rem] premium-surface-strong p-6 lg:p-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(251,191,36,0.18),transparent_28%),radial-gradient(circle_at_86%_15%,rgba(139,92,246,0.18),transparent_34%)]" />
+            <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 border border-gold/25 px-4 py-2 text-xs font-black text-gold mb-4">
+                  <Trophy size={15} /> Prestige board
                 </div>
-              )}
-              {top3[0] && (
-                <div className="flex flex-col items-center">
-                  <Crown size={24} className="text-gold mb-1" fill="currentColor" />
-                  <div className="w-14 h-14 rounded-full bg-gradient-brand flex items-center justify-center text-white font-bold mb-2">
-                    {shortAddr(top3[0].wallet_address).slice(0, 2)}
-                  </div>
-                  <p className="text-xs text-text-secondary mb-1">{shortAddr(top3[0].wallet_address)}</p>
-                  <p className="text-base font-bold text-gold">{top3[0].total_xp} XP</p>
-                  <div className="w-28 h-32 rounded-t-xl mt-2 flex items-start justify-center pt-4"
-                    style={{ background: 'rgba(251,191,36,0.1)', border: '2px solid rgba(251,191,36,0.5)', boxShadow: '0 0 30px rgba(251,191,36,0.15)' }}>
-                    <span className="text-2xl">🥇</span>
-                  </div>
-                </div>
-              )}
-              {top3[2] && (
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center text-white font-bold mb-2">
-                    {shortAddr(top3[2].wallet_address).slice(0, 2)}
-                  </div>
-                  <p className="text-xs text-text-secondary mb-1">{shortAddr(top3[2].wallet_address)}</p>
-                  <p className="text-sm font-bold" style={{ color: '#B87333' }}>{top3[2].total_xp} XP</p>
-                  <div className="w-24 h-16 rounded-t-xl mt-2 flex items-start justify-center pt-2"
-                    style={{ background: 'rgba(184,115,51,0.1)', border: '2px solid rgba(184,115,51,0.3)' }}>
-                    <Award size={24} color="#B87333" />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Table rows 4-10 */}
-            <div className="space-y-2 mb-24">
-              {rest.map((row, i) => {
-                const rankColor = RANK_COLORS[row.rank as keyof typeof RANK_COLORS] || '#64748B';
-                const isMe = isConnected && row.wallet_address.toLowerCase() === walletAddress.toLowerCase();
-                return (
-                  <div
-                    key={row.wallet_address}
-                    className={`bg-card rounded-xl p-4 flex items-center gap-4 ${isMe ? 'border-l-4 border-brand-purple' : ''}`}
+                <h1 className="text-4xl lg:text-6xl font-black text-text-primary">Leaderboard</h1>
+                <p className="mt-3 max-w-2xl text-text-secondary">A competitive hall of signal, streaks, and earned XP. Premium players glow, but rank is won by performance.</p>
+              </div>
+              <div className="grid grid-cols-3 rounded-2xl bg-bg-primary/35 p-1 border border-white/5">
+                {tabs.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setTab(item.id)}
+                    className={`rounded-xl px-4 py-3 text-left transition-all ${tab === item.id ? 'bg-gradient-brand text-white shadow-lg' : 'text-text-secondary hover:text-text-primary'}`}
                   >
-                    <span className="w-8 font-bold text-text-secondary text-sm">#{i + 4}</span>
-                    <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center text-white text-xs font-bold">
-                      {shortAddr(row.wallet_address).slice(0, 2)}
-                    </div>
-                    <span className="flex-1 text-xs font-mono text-text-secondary truncate">
-                      {shortAddr(row.wallet_address)}
-                    </span>
-                    {row.premium_status && <span className="text-gold text-xs">⭐</span>}
-                    <span className="text-xs font-medium w-16" style={{ color: rankColor }}>{row.rank}</span>
-                    <span className="text-xs text-text-secondary w-14">Lvl {row.level}</span>
-                    <span className="text-sm font-bold text-gold w-16 text-right">{row.total_xp} XP</span>
-                  </div>
-                );
-              })}
+                    <span className="block text-sm font-black">{item.label}</span>
+                    <span className="block text-[10px] font-bold opacity-75">{item.hint}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </>
-        )}
+          </section>
+
+          {loading ? (
+            <div className="grid gap-4 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
+            </div>
+          ) : (
+            <>
+              <section className="grid gap-4 md:grid-cols-3 md:items-end">
+                {podiumMeta.map((meta) => {
+                  const row = top3[meta.place - 1];
+                  if (!row) return null;
+                  const Icon = meta.icon;
+                  const isMe = isConnected && row.wallet_address.toLowerCase() === walletAddress.toLowerCase();
+                  return (
+                    <div key={meta.place} className={`${meta.order} relative overflow-hidden rounded-[1.75rem] premium-surface p-5 text-center ${isMe ? 'ring-2 ring-interactive-cyan' : ''}`}>
+                      <div className="absolute inset-0 opacity-60" style={{ background: `radial-gradient(circle at 50% 0%, ${meta.color}24, transparent 52%)` }} />
+                      <div className="relative z-10">
+                        <Icon size={meta.place === 1 ? 38 : 30} className="mx-auto mb-3" style={{ color: meta.color }} fill={meta.place === 1 ? 'currentColor' : 'none'} />
+                        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-brand text-xl font-black text-white shadow-xl">
+                          {initials(row.wallet_address)}
+                        </div>
+                        <p className="eyebrow-label text-xs" style={{ color: meta.color }}>#{meta.place} · {meta.label}</p>
+                        <p className="mt-1 font-mono text-sm text-text-primary">{shortAddr(row.wallet_address)}</p>
+                        <div className="mt-3 flex items-center justify-center gap-2">
+                          {row.premium_status && <span className="rounded-full bg-gold/15 px-2 py-1 text-[10px] font-black text-gold"><Star size={10} className="inline" fill="currentColor" /> Premium</span>}
+                          {isMe && <span className="rounded-full bg-interactive-cyan/15 px-2 py-1 text-[10px] font-black text-interactive-cyan">You</span>}
+                        </div>
+                        <p className="stat-number mt-4 text-4xl font-black" style={{ color: meta.color }}>{row.total_xp.toLocaleString()}</p>
+                        <p className="text-xs text-text-secondary">XP · Level {row.level} · {row.rank}</p>
+                        <div className={`mt-5 ${meta.height} rounded-t-3xl border-t-2`} style={{ borderColor: meta.color, background: `linear-gradient(180deg, ${meta.color}20, transparent)` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </section>
+
+              <section className="premium-surface rounded-[1.75rem] overflow-hidden">
+                <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+                  <div>
+                    <h2 className="text-xl font-black text-text-primary">Contender ranks</h2>
+                    <p className="text-xs text-text-secondary">Dense competitive view for the next challengers.</p>
+                  </div>
+                  <Timer size={20} className="text-interactive-cyan" />
+                </div>
+                <div className="divide-y divide-white/5">
+                  {rest.map((row, i) => {
+                    const rankColor = RANK_COLORS[row.rank as keyof typeof RANK_COLORS] || '#64748B';
+                    const isMe = isConnected && row.wallet_address.toLowerCase() === walletAddress.toLowerCase();
+                    return (
+                      <div key={row.wallet_address} className={`grid grid-cols-[3rem_1fr_auto] items-center gap-3 px-4 py-3 transition-colors ${isMe ? 'bg-interactive-cyan/10' : 'hover:bg-white/[0.025]'}`}>
+                        <span className={`text-lg font-black ${isMe ? 'text-interactive-cyan' : 'text-text-secondary'}`}>#{i + 4}</span>
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary-layer font-black text-text-primary">{initials(row.wallet_address)}</div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate font-mono text-sm font-bold text-text-primary">{shortAddr(row.wallet_address)}</p>
+                              {row.premium_status && <Star size={13} className="text-gold" fill="currentColor" />}
+                              {isMe && <span className="rounded-full bg-interactive-cyan/15 px-2 py-0.5 text-[10px] font-black text-interactive-cyan">YOU</span>}
+                            </div>
+                            <p className="text-xs text-text-secondary">Level {row.level} · <span style={{ color: rankColor }}>{row.rank}</span></p>
+                          </div>
+                        </div>
+                        <p className="text-right font-black text-gold">{row.total_xp.toLocaleString()} XP</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            </>
+          )}
         </div>
       </main>
 
-      {/* Sticky bottom bar */}
-      <div className="fixed bottom-16 lg:bottom-0 left-0 w-full z-40 bg-secondary-layer/95 backdrop-blur border-t-2 border-brand-purple px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between text-sm">
+      <div className="fixed bottom-16 lg:bottom-0 left-0 w-full z-40 border-t border-brand-purple/30 bg-bg-primary/85 px-4 py-3 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 text-sm">
           {isConnected ? (
             <>
-              <span className="text-text-secondary">
-                Your Position: <span className="text-brand-purple font-bold">#{userPos || '—'}</span>
-              </span>
-              <span style={{ color: RANK_COLORS[gameState.rank] }} className="font-medium">
-                {gameState.rank} · Lvl {gameState.level} · {gameState.totalXP} XP
-              </span>
+              <span className="flex items-center gap-2 text-text-secondary"><UserRound size={16} /> Your position <span className="text-interactive-cyan font-black">#{userPos || '—'}</span></span>
+              <span style={{ color: RANK_COLORS[gameState.rank] }} className="font-black">{gameState.rank} · Lvl {gameState.level} · {gameState.totalXP.toLocaleString()} XP</span>
             </>
           ) : (
-            <span className="text-text-secondary mx-auto">Connect wallet to see your position</span>
+            <span className="mx-auto flex items-center gap-2 text-text-secondary"><Sparkles size={15} /> Connect wallet to reveal your standing</span>
           )}
         </div>
       </div>

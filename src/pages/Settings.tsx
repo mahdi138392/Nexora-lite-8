@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Copy, Check, AlertTriangle, ExternalLink, Wallet, Wifi, SlidersHorizontal, ShieldCheck } from 'lucide-react';
 import AppShell from '../components/ui/AppShell';
 import Surface from '../components/ui/Surface';
 import { useWallet } from '../context/WalletContext';
@@ -21,16 +21,17 @@ function loadPrefs(): Prefs {
 }
 
 const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void }> = ({ checked, onChange }) => (
-  <div
+  <button
+    type="button"
     onClick={() => onChange(!checked)}
-    className="w-10 h-6 rounded-full relative cursor-pointer transition-colors duration-200"
-    style={{ backgroundColor: checked ? '#8B5CF6' : '#273449' }}
+    className={`relative h-7 w-12 rounded-full border transition-all duration-200 ${checked ? 'border-brand-purple/50 bg-brand-purple shadow-[0_0_22px_rgba(139,92,246,0.22)]' : 'border-white/10 bg-secondary-layer'}`}
+    aria-pressed={checked}
   >
-    <div
-      className="absolute w-5 h-5 top-0.5 rounded-full bg-white shadow-sm transition-transform duration-200"
-      style={{ transform: checked ? 'translateX(18px)' : 'translateX(2px)' }}
+    <span
+      className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-lg transition-transform duration-200"
+      style={{ transform: checked ? 'translateX(22px)' : 'translateX(2px)' }}
     />
-  </div>
+  </button>
 );
 
 const Settings: React.FC = () => {
@@ -54,13 +55,22 @@ const Settings: React.FC = () => {
   return (
     <>
     <AppShell maxWidth="3xl">
-          <h1 className="font-heading text-3xl font-bold text-text-primary mb-8 tracking-[-0.03em]">Settings</h1>
+          <section className="relative overflow-hidden rounded-[2rem] premium-surface-strong p-6 mb-6">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(55,213,255,0.14),transparent_35%)]" />
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 rounded-full bg-interactive-cyan/10 border border-interactive-cyan/25 px-3 py-1 text-xs font-black text-interactive-cyan mb-3">
+                <SlidersHorizontal size={13} /> Control panel
+              </div>
+              <h1 className="font-heading text-4xl font-black text-text-primary tracking-[-0.03em]">Settings</h1>
+              <p className="mt-2 text-text-secondary">Minimal controls for wallet safety, network readiness, and local preferences.</p>
+            </div>
+          </section>
 
           {/* Account Card */}
           <Surface className="mb-6">
-            <h2 className="font-bold text-lg text-text-primary mb-5">Account</h2>
+            <h2 className="font-black text-xl text-text-primary mb-5 flex items-center gap-2"><Wallet className="text-brand-purple" /> Account & network</h2>
 
-            <div className="py-4 flex justify-between items-center border-b border-secondary-layer">
+            <div className="py-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center border-b border-secondary-layer">
               <div>
                 <p className="text-text-primary font-medium text-sm">Connected Wallet</p>
                 <p className="text-text-secondary text-xs mt-0.5">Your Web3 identity</p>
@@ -80,7 +90,7 @@ const Settings: React.FC = () => {
               </div>
             </div>
 
-            <div className="py-4 flex justify-between items-center border-b border-secondary-layer">
+            <div className="py-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center border-b border-secondary-layer">
               <div>
                 <p className="text-text-primary font-medium text-sm">Network</p>
                 <p className="text-text-secondary text-xs mt-0.5">Current blockchain network</p>
@@ -101,7 +111,7 @@ const Settings: React.FC = () => {
               )}
             </div>
 
-            <div className="py-4 flex justify-between items-center">
+            <div className="py-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
               <div>
                 <p className="text-red-400 font-medium text-sm">Disconnect Wallet</p>
                 <p className="text-text-secondary text-xs mt-0.5">Your progress will be saved</p>
@@ -117,25 +127,25 @@ const Settings: React.FC = () => {
 
           {/* Preferences Card */}
           <Surface className="mb-6">
-            <h2 className="font-bold text-lg text-text-primary mb-1">Preferences</h2>
+            <h2 className="font-black text-xl text-text-primary mb-1 flex items-center gap-2"><ShieldCheck className="text-success-emerald" /> Preferences</h2>
             <p className="text-text-secondary text-xs mb-5">Saved in your browser</p>
 
             <div className="space-y-5">
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-bg-primary/25 border border-white/5 p-4">
                 <div>
                   <p className="text-text-primary font-medium text-sm">XP Animations</p>
                   <p className="text-text-secondary text-xs mt-0.5">Show floating +XP on correct answers</p>
                 </div>
                 <Toggle checked={prefs.xpAnimations} onChange={(v) => updatePref('xpAnimations', v)} />
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-bg-primary/25 border border-white/5 p-4">
                 <div>
                   <p className="text-text-primary font-medium text-sm">Streak Notifications</p>
                   <p className="text-text-secondary text-xs mt-0.5">Remind when streak is at risk</p>
                 </div>
                 <Toggle checked={prefs.notifications} onChange={(v) => updatePref('notifications', v)} />
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-bg-primary/25 border border-white/5 p-4">
                 <div>
                   <p className="text-text-primary font-medium text-sm">Auto-advance</p>
                   <p className="text-text-secondary text-xs mt-0.5">Automatically move to next challenge</p>
@@ -147,7 +157,7 @@ const Settings: React.FC = () => {
 
           {/* About Card */}
           <Surface>
-            <h2 className="font-bold text-lg text-text-primary mb-5">About Nexora</h2>
+            <h2 className="font-black text-xl text-text-primary mb-5 flex items-center gap-2"><Wifi className="text-interactive-cyan" /> About Nexora</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-text-secondary">Version</span>
@@ -192,7 +202,7 @@ const Settings: React.FC = () => {
           onClick={() => setShowDisconnect(false)}
         >
           <div
-            className="bg-card rounded-2xl p-8 max-w-sm w-full text-center"
+            className="premium-surface-strong rounded-[2rem] p-8 max-w-sm w-full text-center"
             style={{ border: '1px solid rgba(139,92,246,0.2)' }}
             onClick={(e) => e.stopPropagation()}
           >
