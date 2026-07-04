@@ -207,7 +207,7 @@ const Challenge: React.FC = () => {
 
   // STATE 1: Category Selection
   const renderCategorySelection = () => (
-    <div className="min-h-screen bg-bg-primary pt-20 pb-8 px-4">
+    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl lg:text-4xl font-bold text-text-primary text-center mb-4">
           Choose Your Challenge
@@ -259,7 +259,7 @@ const Challenge: React.FC = () => {
 
   // STATE 2: Difficulty Selection
   const renderDifficultySelection = () => (
-    <div className="min-h-screen bg-bg-primary pt-20 pb-8 px-4">
+    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4">
       <div className="max-w-2xl mx-auto">
         <button
           onClick={handleBack}
@@ -325,7 +325,7 @@ const Challenge: React.FC = () => {
 
   // STATE 3: Loading
   const renderLoading = () => (
-    <div className="min-h-screen bg-bg-primary pt-20 pb-8 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4 flex items-center justify-center">
       <div className="bg-card rounded-2xl p-10 text-center">
         <div className="mb-6 animate-spin">
           <Logo size={60} />
@@ -360,7 +360,7 @@ const Challenge: React.FC = () => {
     const optionKeys = ['A', 'B', 'C', 'D'] as const;
 
     return (
-      <div className="min-h-screen bg-bg-primary pt-20 pb-8 px-4">
+      <div className="min-h-screen bg-transparent pt-20 pb-8 px-4">
         <div className="max-w-[680px] mx-auto">
           <button
             onClick={handleBack}
@@ -474,7 +474,7 @@ const Challenge: React.FC = () => {
 
   // STATE 5: Correct Result
   const renderCorrect = () => (
-    <div className="min-h-screen bg-bg-primary pt-20 pb-8 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4 flex items-center justify-center">
       <div className="max-w-[680px] w-full">
         <div className="bg-card rounded-2xl p-8 lg:p-10 text-center">
           <div className="mb-6 animate-bounce">
@@ -504,7 +504,7 @@ const Challenge: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleNextChallenge}
-              className="flex-1 py-3 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-xl font-semibold transition-all"
+              className="flex-1 py-3 premium-button text-white rounded-xl font-semibold transition-all"
             >
               Next Challenge
             </button>
@@ -522,7 +522,7 @@ const Challenge: React.FC = () => {
 
   // STATE 6: Wrong Result
   const renderWrong = () => (
-    <div className="min-h-screen bg-bg-primary pt-20 pb-8 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-transparent pt-20 pb-8 px-4 flex items-center justify-center">
       <div className="max-w-[680px] w-full">
         <div className="bg-card rounded-2xl p-8 lg:p-10 text-center">
           <div className="mb-6">
@@ -547,7 +547,7 @@ const Challenge: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleNextChallenge}
-              className="flex-1 py-3 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-xl font-semibold transition-all"
+              className="flex-1 py-3 premium-button text-white rounded-xl font-semibold transition-all"
             >
               Try Again
             </button>
@@ -564,7 +564,7 @@ const Challenge: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-20 lg:pt-24 pb-24 lg:pb-8">
+    <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-24 lg:pb-8">
       <Sidebar />
       <main className="lg:pl-60">
         {state === 'category' && renderCategorySelection()}

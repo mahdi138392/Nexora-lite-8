@@ -50,7 +50,7 @@ const StatsRow: React.FC = () => {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="bg-card rounded-xl p-5 lg:p-6 border border-secondary-layer/50 hover:border-brand-purple/30 transition-all duration-200"
+          className="premium-surface rounded-xl p-5 lg:p-6 border border-secondary-layer/50 hover:border-brand-purple/30 transition-all duration-200"
         >
           {/* Icon */}
           <div

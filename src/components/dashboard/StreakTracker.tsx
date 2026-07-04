@@ -11,7 +11,7 @@ const days = [
 
 const StreakTracker: React.FC = () => {
   return (
-    <div className="bg-card rounded-xl p-5 lg:p-6 border border-secondary-layer/50">
+    <div className="premium-surface rounded-xl p-5 lg:p-6 border border-secondary-layer/50">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-text-primary">Daily Streak Progress</h2>
         <div className="flex items-center gap-2 text-sm text-text-secondary">

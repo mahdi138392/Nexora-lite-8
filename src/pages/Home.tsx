@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 
 const Home: React.FC = () => {
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div className="min-h-screen bg-transparent">
       <Hero />
       <Features />
       <Stats />

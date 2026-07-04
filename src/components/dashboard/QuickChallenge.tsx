@@ -40,7 +40,7 @@ const QuickChallenge: React.FC = () => {
         {challenges.map((challenge) => (
           <div
             key={challenge.id}
-            className="relative bg-card rounded-xl p-5 border border-secondary-layer/50 hover:border-brand-purple/30 transition-all duration-200 group"
+            className="relative premium-surface rounded-xl p-5 border border-secondary-layer/50 hover:border-brand-purple/30 transition-all duration-200 group"
           >
             {/* Badge */}
             {challenge.hasBadge && (
@@ -64,7 +64,7 @@ const QuickChallenge: React.FC = () => {
             <p className="text-sm text-text-secondary mb-4">{challenge.levels}</p>
 
             {/* Play Button */}
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-lg font-medium transition-all duration-200 hover:scale-[1.02]">
+            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 premium-button text-white rounded-lg font-medium transition-all duration-200 hover:scale-[1.02]">
               <Play size={16} fill="currentColor" />
               <span>Play Now</span>
             </button>

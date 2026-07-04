@@ -42,8 +42,8 @@ const Navbar: React.FC = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-bg-primary/80 backdrop-blur-lg border-b border-secondary-layer/50'
-          : 'bg-transparent'
+          ? 'bg-bg-primary/78 backdrop-blur-xl border-b border-white/10 shadow-premium'
+          : 'bg-bg-primary/20 backdrop-blur-sm'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -75,13 +75,13 @@ const Navbar: React.FC = () => {
           {isConnected ? (
             <div className="flex items-center gap-3">
               {/* XP Badge */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary-layer rounded-full">
+              <div className="premium-badge flex items-center gap-1.5 px-3 py-1.5 rounded-full">
                 <Zap size={16} className="text-gold" />
                 <span className="text-sm font-semibold text-gold">{formatXP(gameState.totalXP)} XP</span>
               </div>
 
               {/* Wallet Address */}
-              <div className="hidden sm:flex items-center px-3 py-1.5 bg-secondary-layer rounded-full">
+              <div className="hidden sm:flex premium-badge items-center px-3 py-1.5 rounded-full">
                 <span className="text-sm font-medium text-text-primary">
                   {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
                 </span>
@@ -104,7 +104,7 @@ const Navbar: React.FC = () => {
             <button
               onClick={connectWallet}
               disabled={isConnecting}
-              className="flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="premium-button flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 text-white rounded-xl font-semibold transition-all duration-200 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {isConnecting ? (
                 <Loader2 size={18} className="animate-spin" />

@@ -26,7 +26,7 @@ const socialLinks = [
 const Footer: React.FC = () => {
   return (
     <>
-      <footer className="bg-bg-primary py-12 lg:py-16">
+      <footer className="bg-transparent py-12 lg:py-16 border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8 items-center">
             {/* Logo & Tagline */}
@@ -55,7 +55,7 @@ const Footer: React.FC = () => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 bg-secondary-layer rounded-lg text-text-secondary hover:text-text-primary hover:bg-brand-purple/20 transition-all duration-200 group"
+                  className="premium-badge flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:border-brand-purple/40 transition-all duration-200 group"
                 >
                   {link.icon}
                   <span className="text-sm font-medium">{link.name}</span>

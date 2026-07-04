@@ -51,7 +51,7 @@ const activities = [
 
 const RecentActivity: React.FC = () => {
   return (
-    <div className="bg-card rounded-xl border border-secondary-layer/50 overflow-hidden">
+    <div className="premium-surface rounded-xl border border-secondary-layer/50 overflow-hidden">
       <div className="px-5 py-4 border-b border-secondary-layer/50">
         <h2 className="text-xl font-bold text-text-primary">Recent Activity</h2>
       </div>

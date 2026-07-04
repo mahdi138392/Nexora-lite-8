@@ -27,7 +27,7 @@ const features = [
 
 const Features: React.FC = () => {
   return (
-    <section className="relative py-20 lg:py-28 bg-bg-primary">
+    <section className="relative py-20 lg:py-28 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -44,11 +44,12 @@ const Features: React.FC = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group relative p-6 lg:p-8 bg-card rounded-2xl border border-brand-purple/20 hover:border-brand-purple/50 transition-all duration-300 hover:shadow-lg hover:shadow-brand-purple/10"
+              className="group relative overflow-hidden p-6 lg:p-8 premium-surface rounded-2xl hover:border-brand-purple/45 transition-all duration-300 hover:-translate-y-1 hover:shadow-purple-glow"
             >
+              <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-brand-purple/10 blur-3xl group-hover:bg-interactive-cyan/10 transition-colors" />
               {/* Icon */}
               <div
-                className={`inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} mb-6 group-hover:scale-110 transition-transform duration-300`}
+                className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br shadow-premium ${feature.gradient} mb-6 group-hover:scale-110 transition-transform duration-300`}
               >
                 <feature.icon size={28} className="text-white" />
               </div>

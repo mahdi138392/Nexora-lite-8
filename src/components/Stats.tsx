@@ -24,16 +24,17 @@ const stats = [
 
 const Stats: React.FC = () => {
   return (
-    <section className="py-16 lg:py-24 bg-card">
+    <section className="relative py-16 lg:py-24 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid sm:grid-cols-3 gap-8 lg:gap-12">
+        <div className="neon-divider mb-12" />
+        <div className="grid sm:grid-cols-3 gap-6 lg:gap-8">
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="text-center group"
+              className="premium-surface rounded-2xl p-6 text-center group hover:border-interactive-cyan/35 transition-all duration-300"
             >
               {/* Icon */}
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-secondary-layer mb-4 group-hover:bg-brand-purple/20 transition-colors duration-300">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg premium-badge mb-4 group-hover:bg-brand-purple/20 transition-colors duration-300">
                 <stat.icon size={24} className="text-brand-purple" />
               </div>
 

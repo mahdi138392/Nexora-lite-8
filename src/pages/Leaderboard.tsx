@@ -64,7 +64,7 @@ const Leaderboard: React.FC = () => {
   const rest = data.slice(3, 10);
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-20 lg:pt-24 pb-24 lg:pb-8">
+    <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-24 lg:pb-8">
       <Sidebar />
       <main className="lg:pl-60 px-4">
         <div className="max-w-4xl mx-auto">

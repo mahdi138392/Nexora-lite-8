@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
   const nextStreakXP = STREAK_BONUS[nextStreakDay] || 50;
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-20 lg:pt-24 pb-20 lg:pb-8">
+    <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-20 lg:pb-8">
       <Sidebar />
       <main className="lg:pl-60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,7 +84,7 @@ const Dashboard: React.FC = () => {
               </div>
               <Link
                 to="/challenge"
-                className="bg-gradient-brand rounded-xl px-5 py-2.5 text-sm font-bold text-white flex items-center gap-2 hover:scale-105 transition-transform"
+                className="premium-button rounded-xl px-5 py-2.5 text-sm font-bold text-white flex items-center gap-2 hover:scale-105 transition-transform"
               >
                 <Zap size={16} />
                 Start Challenge

@@ -85,7 +85,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <div className="mt-6">
               <button
                 onClick={onClose}
-                className="w-full py-3 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-xl font-semibold transition-all"
+                className="w-full py-3 premium-button text-white rounded-xl font-semibold transition-all"
               >
                 Done
               </button>
@@ -101,7 +101,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={onConfirm}
-                className="flex-1 py-3 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-xl font-semibold transition-all"
+                className="flex-1 py-3 premium-button text-white rounded-xl font-semibold transition-all"
               >
                 Try Again
               </button>
@@ -147,7 +147,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={onConfirm}
-                className="flex-1 py-3 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-xl font-semibold transition-all"
+                className="flex-1 py-3 premium-button text-white rounded-xl font-semibold transition-all"
               >
                 Confirm
               </button>
@@ -322,7 +322,7 @@ const Shop: React.FC = () => {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-bg-primary pt-20 lg:pt-24 pb-20 lg:pb-8 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-20 lg:pb-8 flex items-center justify-center px-4">
         <div className="bg-card rounded-2xl p-8 lg:p-10 text-center max-w-md w-full" style={{ border: '1px solid rgba(139,92,246,0.2)' }}>
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-purple/10 mb-6">
             <Wallet size={32} className="text-brand-purple" />
@@ -331,7 +331,7 @@ const Shop: React.FC = () => {
           <p className="text-text-secondary mb-6 text-sm">Purchase XP Boosters and Premium Pass using Ritual Testnet.</p>
           <button
             onClick={connectWallet}
-            className="px-6 py-3 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-xl font-semibold transition-all"
+            className="px-6 py-3 premium-button text-white rounded-xl font-semibold transition-all"
           >
             Connect Wallet
           </button>
@@ -341,7 +341,7 @@ const Shop: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-20 lg:pt-24 pb-20 lg:pb-8">
+    <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-20 lg:pb-8">
       <Sidebar />
       <main className="lg:pl-60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

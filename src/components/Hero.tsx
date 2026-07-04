@@ -17,10 +17,10 @@ const Hero: React.FC = () => {
     }
   };
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-bg-primary">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero">
       {/* Grid Pattern */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
+        className="absolute inset-0 opacity-[0.075]"
         style={{
           backgroundImage: `
             linear-gradient(rgba(139, 92, 246, 0.5) 1px, transparent 1px),
@@ -38,10 +38,10 @@ const Hero: React.FC = () => {
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
         {/* Main Heading */}
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-text-primary mb-2 leading-tight">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-text-primary mb-2 leading-tight tracking-[-0.04em] drop-shadow-[0_0_34px_rgba(155,109,255,0.16)]">
           Challenge Your Mind.
         </h1>
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text-secondary mb-8 leading-tight">
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 leading-tight tracking-[-0.035em] bg-gradient-to-r from-text-secondary via-interactive-cyan to-gold bg-clip-text text-transparent">
           Climb the Ranks.
         </h2>
 
@@ -54,10 +54,10 @@ const Hero: React.FC = () => {
         <button
           onClick={handleCTAClick}
           disabled={isConnecting}
-          className="group relative inline-flex items-center gap-3 px-8 py-4 lg:px-10 lg:py-5 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-brand-purple/25 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="premium-button group relative inline-flex items-center gap-3 px-8 py-4 lg:px-10 lg:py-5 text-white font-semibold rounded-2xl transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           <span
-            className="absolute inset-0 rounded-xl bg-gradient-brand opacity-100 group-hover:opacity-90 transition-opacity"
+            className="absolute inset-0 rounded-2xl bg-gradient-brand opacity-100 group-hover:opacity-90 transition-opacity"
           />
           {isConnecting ? (
             <>
@@ -76,15 +76,15 @@ const Hero: React.FC = () => {
 
         {/* Feature Pills */}
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-12">
-          <div className="flex items-center gap-2 px-4 py-2 bg-card/50 border border-brand-purple/20 rounded-full text-text-secondary text-sm sm:text-base">
+          <div className="flex items-center gap-2 px-4 py-2 premium-surface border border-brand-purple/20 rounded-full text-text-secondary text-sm sm:text-base">
             <Zap size={16} className="text-brand-purple" />
             <span>AI Challenges</span>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-card/50 border border-interactive-cyan/20 rounded-full text-text-secondary text-sm sm:text-base">
+          <div className="flex items-center gap-2 px-4 py-2 premium-surface border border-interactive-cyan/20 rounded-full text-text-secondary text-sm sm:text-base">
             <Globe size={16} className="text-interactive-cyan" />
             <span>Web3 Native</span>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-card/50 border border-gold/20 rounded-full text-text-secondary text-sm sm:text-base">
+          <div className="flex items-center gap-2 px-4 py-2 premium-surface border border-gold/20 rounded-full text-text-secondary text-sm sm:text-base">
             <TrendingUp size={16} className="text-gold" />
             <span>Earn XP & Rank Up</span>
           </div>
