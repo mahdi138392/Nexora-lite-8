@@ -27,6 +27,12 @@ export default {
         'cyan-glow': '0 0 30px rgba(55, 213, 255, 0.18)',
         'gold-glow': '0 0 28px rgba(255, 209, 102, 0.18)',
       },
+      boxShadow: {
+        'premium': '0 24px 80px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(155, 109, 255, 0.12)',
+        'purple-glow': '0 0 32px rgba(155, 109, 255, 0.22)',
+        'cyan-glow': '0 0 30px rgba(55, 213, 255, 0.18)',
+        'gold-glow': '0 0 28px rgba(255, 209, 102, 0.18)',
+      },
       backgroundImage: {
         'gradient-brand': 'linear-gradient(135deg, #9B6DFF 0%, #37D5FF 100%)',
         'gradient-gold': 'linear-gradient(135deg, #FFD166 0%, #FF8F70 100%)',
