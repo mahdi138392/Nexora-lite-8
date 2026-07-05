@@ -8,6 +8,7 @@ import { avatarUrl } from '../lib/avatars';
 import AvatarPickerModal from '../components/profile/AvatarPickerModal';
 import EmptyState from '../components/profile/EmptyState';
 import InventoryList from '../components/profile/InventoryList';
+import MetricCard from '../components/ui/MetricCard';
 import ProfileStatCard from '../components/profile/ProfileStatCard';
 import StreakProgress from '../components/profile/StreakProgress';
 import { formatTimestamp, shortenAddress } from '../lib/format';
@@ -188,18 +189,9 @@ const Profile: React.FC = () => {
           <div className="premium-surface rounded-[1.5rem] p-6">
             <h2 className="font-black text-2xl text-text-primary mb-5">Performance Map</h2>
             <div className="grid grid-cols-3 gap-3 mb-5">
-              <div className="premium-surface rounded-2xl p-4 text-center">
-                <p className="text-text-primary font-bold">{gameState.totalChallenges}</p>
-                <p className="text-text-secondary text-xs">Total</p>
-              </div>
-              <div className="premium-surface rounded-2xl p-4 text-center">
-                <p className="text-success-emerald font-bold">{gameState.correctAnswers}</p>
-                <p className="text-text-secondary text-xs">Correct</p>
-              </div>
-              <div className="premium-surface rounded-2xl p-4 text-center">
-                <p className="text-brand-purple font-bold">{Math.round(gameState.accuracy * 100)}%</p>
-                <p className="text-text-secondary text-xs">Accuracy</p>
-              </div>
+              <MetricCard label="Total" value={<span className="font-bold text-text-primary">{gameState.totalChallenges}</span>} />
+              <MetricCard label="Correct" value={<span className="font-bold text-success-emerald">{gameState.correctAnswers}</span>} />
+              <MetricCard label="Accuracy" value={<span className="font-bold text-brand-purple">{Math.round(gameState.accuracy * 100)}%</span>} />
             </div>
             <div className="space-y-3">
               {[

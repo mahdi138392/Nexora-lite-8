@@ -1,4 +1,5 @@
 import React, { type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from 'react';
+import { controls, radius, surfaces } from '../../lib/theme';
 import { cx } from '../../lib/ui';
 
 interface ProductCardProps extends HTMLAttributes<HTMLDivElement> {
@@ -6,13 +7,6 @@ interface ProductCardProps extends HTMLAttributes<HTMLDivElement> {
   tone?: 'default' | 'strong' | 'gold' | 'quiet';
   reveal?: boolean;
 }
-
-const cardTones: Record<NonNullable<ProductCardProps['tone']>, string> = {
-  default: 'premium-surface',
-  strong: 'premium-surface-strong',
-  gold: 'bg-gold/[0.035] border border-gold/30 shadow-gold-glow',
-  quiet: 'bg-bg-primary/35 border border-white/5',
-};
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   children,
@@ -22,7 +16,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   ...props
 }) => (
   <div
-    className={cx('rounded-[1.5rem]', cardTones[tone], reveal && 'product-reveal', className)}
+    className={cx(radius.lg, surfaces[tone], reveal && 'product-reveal', className)}
     {...props}
   >
     {children}
@@ -69,7 +63,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   ...props
 }) => (
   <button
-    className={cx('interactive-lift rounded-2xl px-4 py-3 font-black transition-all focus-ring disabled:cursor-not-allowed disabled:opacity-60', buttonVariants[variant], className)}
+    className={cx(controls.buttonBase, buttonVariants[variant], className)}
     {...props}
   >
     {children}
@@ -77,5 +71,5 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 );
 
 export const Skeleton: React.FC<HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => (
-  <div className={cx('skeleton-shimmer rounded-2xl bg-secondary-layer/70', className)} {...props} />
+  <div className={cx('skeleton-shimmer bg-secondary-layer/70', radius.md, className)} {...props} />
 );
