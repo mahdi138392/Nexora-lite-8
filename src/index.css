@@ -219,18 +219,19 @@ body::before {
   to { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes floatUp {
-  0% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-80px); }
+@keyframes notificationEnter {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.bg-card { background: linear-gradient(145deg, rgba(21, 36, 62, 0.88), rgba(10, 19, 35, 0.82)) !important; }
-.bg-secondary-layer { background-color: rgba(23, 36, 58, 0.86) !important; }
-.border-card { border-color: rgba(158, 172, 196, 0.13) !important; }
+.notification-toast {
+  animation: notificationEnter 220ms ease-out both;
+}
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(100%); }
-  to { opacity: 1; transform: translateX(0); }
+@media (prefers-reduced-motion: reduce) {
+  .notification-toast {
+    animation: none;
+  }
 }
 
 @keyframes floatUp {

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { CheckCircle, XCircle, AlertCircle, Info, X, Trophy, Flame, Star } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -22,50 +23,121 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-const config: Record<ToastType, { icon: LucideIcon; color: string; bg: string; border: string }> = {
+const config: Record<ToastType, { icon: LucideIcon; color: string; title: string }> = {
   success: {
     icon: CheckCircle,
-    color: '#10B981',
-    bg: 'rgba(16,185,129,0.1)',
-    border: 'rgba(16,185,129,0.3)',
+    color: '#2DE39B',
+    title: 'Success',
   },
   error: {
     icon: XCircle,
-    color: '#EF4444',
-    bg: 'rgba(239,68,68,0.1)',
-    border: 'rgba(239,68,68,0.3)',
+    color: '#FF6B7A',
+    title: 'Action needed',
   },
   warning: {
     icon: AlertCircle,
-    color: '#FBBF24',
-    bg: 'rgba(251,191,36,0.1)',
-    border: 'rgba(251,191,36,0.3)',
+    color: '#FFD166',
+    title: 'Heads up',
   },
   info: {
     icon: Info,
-    color: '#38BDF8',
-    bg: 'rgba(56,189,248,0.1)',
-    border: 'rgba(56,189,248,0.3)',
+    color: '#37D5FF',
+    title: 'Update',
   },
   achievement: {
     icon: Star,
-    color: '#FBBF24',
-    bg: 'rgba(251,191,36,0.1)',
-    border: 'rgba(251,191,36,0.3)',
+    color: '#FFD166',
+    title: 'Achievement unlocked',
   },
   streak: {
     icon: Flame,
-    color: '#F97316',
-    bg: 'rgba(249,115,22,0.1)',
-    border: 'rgba(249,115,22,0.3)',
+    color: '#FF8F70',
+    title: 'Streak update',
   },
   rank: {
     icon: Trophy,
-    color: '#8B5CF6',
-    bg: 'rgba(139,92,246,0.1)',
-    border: 'rgba(139,92,246,0.3)',
+    color: '#9B6DFF',
+    title: 'Rank update',
   },
 };
+
+interface NotificationItemProps {
+  toast: Toast;
+  onRemove: (id: number) => void;
+}
+
+function NotificationItem({ toast, onRemove }: NotificationItemProps) {
+  const cfg = config[toast.type];
+  const Icon = cfg.icon;
+
+  return (
+    <div
+      role={toast.type === 'error' || toast.type === 'warning' ? 'alert' : 'status'}
+      aria-live={toast.type === 'error' || toast.type === 'warning' ? 'assertive' : 'polite'}
+      className="notification-toast pointer-events-auto grid grid-cols-[auto,minmax(0,1fr),auto] gap-3.5 rounded-2xl border px-4 py-3.5 shadow-[0_24px_70px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.035),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-4.5"
+      style={{
+        background: `linear-gradient(135deg, ${cfg.color}18 0%, rgba(20, 28, 51, 0) 34%), #141C33`,
+        borderColor: 'rgba(158, 172, 196, 0.22)',
+      }}
+    >
+      <div
+        className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border"
+        style={{
+          backgroundColor: `${cfg.color}17`,
+          borderColor: `${cfg.color}42`,
+          color: cfg.color,
+          boxShadow: `0 0 22px ${cfg.color}1f`,
+        }}
+        aria-hidden="true"
+      >
+        <Icon size={19} strokeWidth={2.35} />
+      </div>
+
+      <div className="min-w-0 space-y-1 pr-1">
+        <p className="font-heading text-[13px] font-semibold leading-snug tracking-[-0.01em] text-text-primary">
+          {cfg.title}
+        </p>
+        <p className="break-words text-sm leading-5 text-[#D9E4F7]">{toast.message}</p>
+        {toast.link && (
+          <span
+            className="inline-flex pt-0.5 text-xs font-semibold leading-none"
+            style={{ color: cfg.color }}
+          >
+            {toast.link.label}
+          </span>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onRemove(toast.id)}
+        className="-mr-1 -mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/[0.07] hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-cyan"
+        aria-label={`Dismiss ${cfg.title.toLowerCase()} notification`}
+      >
+        <X size={16} aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
+interface NotificationContainerProps {
+  toasts: Toast[];
+  onRemove: (id: number) => void;
+}
+
+function NotificationContainer({ toasts, onRemove }: NotificationContainerProps) {
+  return (
+    <div className="pointer-events-none fixed left-1/2 top-[max(1.25rem,env(safe-area-inset-top))] z-[9999] flex w-[min(90vw,28rem)] -translate-x-1/2 flex-col gap-3 sm:top-[max(1.5rem,env(safe-area-inset-top))] sm:w-[min(28rem,calc(100vw-2rem))]">
+      {toasts.map((toast) => (
+        <NotificationItem key={toast.id} toast={toast} onRemove={onRemove} />
+      ))}
+    </div>
+  );
+}
+
+function NotificationPortal({ toasts, onRemove }: NotificationContainerProps) {
+  return createPortal(<NotificationContainer toasts={toasts} onRemove={onRemove} />, document.body);
+}
 
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -88,38 +160,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-20 right-4 z-[100] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
-        {toasts.map((toast) => {
-          const cfg = config[toast.type];
-          const Icon = cfg.icon;
-          return (
-            <div
-              key={toast.id}
-              className="pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-lg animate-[slideIn_0.3s_ease-out]"
-              style={{ backgroundColor: cfg.bg, border: `1px solid ${cfg.border}` }}
-            >
-              <Icon size={20} className="flex-shrink-0 mt-0.5" style={{ color: cfg.color }} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-text-primary leading-relaxed">{toast.message}</p>
-                {toast.link && (
-                  <span
-                    className="inline-block mt-1.5 text-xs font-medium"
-                    style={{ color: cfg.color }}
-                  >
-                    {toast.link.label}
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => removeToast(toast.id)}
-                className="flex-shrink-0 text-text-secondary hover:text-text-primary transition-colors"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          );
-        })}
-      </div>
+      <NotificationPortal toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>
   );
 };
