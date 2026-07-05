@@ -164,46 +164,62 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     resetGame();
   }, [resetGame]);
 
-  const switchToRitual = useCallback(async () => {
+  const switchToRitual = async () => {
     if (!window.ethereum) {
       showToast('error', 'Please install MetaMask to continue');
       return;
     }
+
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: RITUAL_CHAIN_ID }],
       });
     } catch (err: unknown) {
-      if ((err as WalletError).code === 4902) {
+      const code = (err as WalletError)?.code;
+      if (code === 4902) {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [RITUAL_NETWORK],
           });
         } catch {
-          showToast('error', 'Failed to add Ritual network.');
+          showToast(
+            'error',
+            'Failed to add Ritual network. Please add it manually in your wallet settings.'
+          );
         }
-      } else if ((err as WalletError).code !== 4001) {
-        showToast('error', 'Failed to switch network.');
+      }
+      // For other error codes, do not show an error immediately —
+      // some mobile wallets report an error even when the switch
+      // actually completes a moment later. Fall through to polling.
+    }
+
+    // Poll for up to 10 seconds (checking every second), since mobile
+    // wallet browsers often need a few seconds for the user to notice
+    // and tap the confirmation prompt.
+    for (let i = 0; i < 10; i++) {
+      await new Promise((r) => setTimeout(r, 1000));
+      try {
+        const chainId = (await window.ethereum.request({
+          method: 'eth_chainId',
+        })) as string;
+        if (chainId === RITUAL_CHAIN_ID) {
+          setIsCorrectNetwork(true);
+          showToast('success', 'Switched to Ritual Network');
+          return;
+        }
+      } catch {
+        // ignore transient errors while polling
       }
     }
 
-    // Always re-verify actual chain state after attempting the switch,
-    // since some mobile wallet browsers resolve the promise without
-    // actually completing the switch.
-    await new Promise((r) => setTimeout(r, 500));
-    const chainId = (await window.ethereum.request({ method: 'eth_chainId' })) as string;
-    const success = chainId === RITUAL_CHAIN_ID;
-    setIsCorrectNetwork(success);
-
-    if (!success) {
-      showToast(
-        'error',
-        'Network switch did not complete. Please open your wallet app and manually select the Ritual network, then return to this page.'
-      );
-    }
-  }, [showToast]);
+    setIsCorrectNetwork(false);
+    showToast(
+      'error',
+      'Network switch did not complete. Please open your wallet app, manually select the Ritual network, then return to this page.'
+    );
+  };
 
   const getRitualBalance = useCallback(async (): Promise<string> => {
     if (!window.ethereum || !walletAddress) return '0';
