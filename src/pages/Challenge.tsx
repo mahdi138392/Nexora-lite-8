@@ -393,13 +393,13 @@ const Challenge: React.FC = () => {
                   style={{ borderColor: `${difficulty.borderColor}66`, boxShadow: `0 18px 45px ${difficulty.glow}` }}
                 >
                   <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+                    <div className="flex min-w-0 items-center gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary-layer">
                         {difficulty.id === 'easy' && <Shield size={22} style={{ color: difficulty.borderColor }} />}
                         {difficulty.id === 'medium' && <Zap size={22} style={{ color: difficulty.borderColor }} />}
                         {difficulty.id === 'hard' && <Trophy size={22} style={{ color: difficulty.borderColor }} />}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="text-xl font-black text-text-primary">{difficulty.name}</h2>
                           <span className="rounded-full bg-secondary-layer px-2 py-0.5 text-[10px] font-black text-text-secondary">{difficulty.stakes}</span>
@@ -407,9 +407,9 @@ const Challenge: React.FC = () => {
                         <p className="mt-1 text-sm text-text-secondary">{difficulty.description}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="stat-number text-3xl font-black" style={{ color: difficulty.borderColor }}>+{adjustedXP}</p>
-                      <p className="text-xs font-bold text-text-secondary">XP · {difficulty.pace}</p>
+                    <div className="min-w-[72px] flex-shrink-0 text-right">
+                      <p className="stat-number whitespace-nowrap text-3xl font-black" style={{ color: difficulty.borderColor }}>+{adjustedXP}</p>
+                      <p className="break-normal text-xs font-bold text-text-secondary">XP · {difficulty.pace}</p>
                     </div>
                   </div>
                 </button>
