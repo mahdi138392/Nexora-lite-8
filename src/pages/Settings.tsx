@@ -24,7 +24,7 @@ const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void }> = (
   <button
     type="button"
     onClick={() => onChange(!checked)}
-    className={`relative h-7 w-12 rounded-full border transition-all duration-200 ${checked ? 'border-brand-purple/50 bg-brand-purple shadow-[0_0_22px_rgba(139,92,246,0.22)]' : 'border-white/10 bg-secondary-layer'}`}
+    className={`relative h-7 w-12 rounded-full border transition-all duration-200 ${checked ? 'border-brand-purple/50 bg-brand-purple shadow-[0_10px_24px_rgba(0,0,0,0.24)]' : 'border-white/10 bg-secondary-layer'}`}
     aria-pressed={checked}
   >
     <span
@@ -56,7 +56,7 @@ const Settings: React.FC = () => {
     <>
     <AppShell maxWidth="3xl">
           <section className="relative overflow-hidden rounded-[2rem] premium-surface-strong p-6 mb-6">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(55,213,255,0.14),transparent_35%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(243,201,139,0.14),transparent_35%)]" />
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 rounded-full bg-interactive-cyan/10 border border-interactive-cyan/25 px-3 py-1 text-xs font-black text-interactive-cyan mb-3">
                 <SlidersHorizontal size={13} /> Control panel
@@ -113,12 +113,12 @@ const Settings: React.FC = () => {
 
             <div className="py-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
               <div>
-                <p className="text-red-400 font-medium text-sm">Disconnect Wallet</p>
+                <p className="text-danger font-medium text-sm">Disconnect Wallet</p>
                 <p className="text-text-secondary text-xs mt-0.5">Your progress will be saved</p>
               </div>
               <button
                 onClick={() => setShowDisconnect(true)}
-                className="border border-red-500/50 text-red-400 rounded-xl px-4 py-2 text-sm hover:bg-red-500/10 transition"
+                className="border border-danger/50 text-danger rounded-xl px-4 py-2 text-sm hover:bg-danger/10 transition"
               >
                 Disconnect
               </button>
@@ -198,12 +198,12 @@ const Settings: React.FC = () => {
       {showDisconnect && (
         <div
           className="fixed inset-0 z-[90] flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(4px)' }}
+          style={{ backgroundColor: 'rgba(9,7,5,0.9)', backdropFilter: 'blur(4px)' }}
           onClick={() => setShowDisconnect(false)}
         >
           <div
             className="premium-surface-strong rounded-[2rem] p-8 max-w-sm w-full text-center"
-            style={{ border: '1px solid rgba(139,92,246,0.2)' }}
+            style={{ border: '1px solid rgba(216,140,58,0.2)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <AlertTriangle size={40} className="text-gold mx-auto mb-4" />
@@ -214,7 +214,7 @@ const Settings: React.FC = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => { disconnectWallet(); setShowDisconnect(false); }}
-                className="flex-1 py-3 bg-red-500 text-white rounded-xl font-semibold"
+                className="flex-1 py-3 bg-danger text-white rounded-xl font-semibold"
               >
                 Disconnect
               </button>

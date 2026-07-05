@@ -26,37 +26,37 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 const config: Record<ToastType, { icon: LucideIcon; color: string; title: string }> = {
   success: {
     icon: CheckCircle,
-    color: '#2DE39B',
+    color: '#3CB371',
     title: 'Success',
   },
   error: {
     icon: XCircle,
-    color: '#FF6B7A',
+    color: '#E45A5A',
     title: 'Action needed',
   },
   warning: {
     icon: AlertCircle,
-    color: '#FFD166',
+    color: '#F3C98B',
     title: 'Heads up',
   },
   info: {
     icon: Info,
-    color: '#37D5FF',
+    color: '#F3C98B',
     title: 'Update',
   },
   achievement: {
     icon: Star,
-    color: '#FFD166',
+    color: '#F3C98B',
     title: 'Achievement unlocked',
   },
   streak: {
     icon: Flame,
-    color: '#FF8F70',
+    color: '#F0B429',
     title: 'Streak update',
   },
   rank: {
     icon: Trophy,
-    color: '#9B6DFF',
+    color: '#D88C3A',
     title: 'Rank update',
   },
 };
@@ -76,8 +76,8 @@ function NotificationItem({ toast, onRemove }: NotificationItemProps) {
       aria-live={toast.type === 'error' || toast.type === 'warning' ? 'assertive' : 'polite'}
       className="notification-toast pointer-events-auto grid grid-cols-[auto,minmax(0,1fr),auto] gap-3.5 rounded-2xl border px-4 py-3.5 shadow-[0_24px_70px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.035),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-4.5"
       style={{
-        background: `linear-gradient(135deg, ${cfg.color}18 0%, rgba(20, 28, 51, 0) 34%), #141C33`,
-        borderColor: 'rgba(158, 172, 196, 0.22)',
+        background: `linear-gradient(135deg, ${cfg.color}18 0%, rgba(9, 7, 5, 0) 34%), #15110D`,
+        borderColor: 'rgba(255, 180, 90, 0.15)',
       }}
     >
       <div

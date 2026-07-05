@@ -26,17 +26,17 @@ const Hero: React.FC = () => {
   return (
     <section className="relative min-h-screen overflow-hidden bg-gradient-hero pt-28 lg:pt-32">
       <div
-        className="absolute inset-0 opacity-[0.085]"
+        className="absolute inset-0 opacity-[0.045]"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(155, 109, 255, 0.52) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(55, 213, 255, 0.34) 1px, transparent 1px)
+            linear-gradient(rgba(216, 140, 58, 0.52) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(243, 201, 139, 0.34) 1px, transparent 1px)
           `,
           backgroundSize: '56px 56px',
         }}
       />
-      <div className="absolute left-1/2 top-[52%] h-[38rem] w-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-purple/10 blur-3xl" />
-      <div className="absolute -right-40 top-20 h-96 w-96 rounded-full bg-interactive-cyan/10 blur-3xl" />
+      <div className="absolute left-1/2 top-[52%] h-[38rem] w-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute -right-40 top-20 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />
 
       {/* Oversized abstract identity watermark */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-35">
@@ -51,7 +51,7 @@ const Hero: React.FC = () => {
               <span>Competitive learning for Web3 natives</span>
             </div>
 
-            <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-extrabold text-text-primary mb-6 leading-[0.98] tracking-[-0.034em] drop-shadow-[0_0_34px_rgba(155,109,255,0.16)]">
+            <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-extrabold text-text-primary mb-6 leading-[0.98] tracking-[-0.034em] ">
               Turn knowledge into rank.
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-text-secondary max-w-2xl mx-auto lg:mx-0 mb-9 leading-8">

@@ -86,7 +86,7 @@ const GameNotifications: React.FC = () => {
       {showLevelUp && levelNum !== null && (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center"
-          style={{ backgroundColor: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(4px)' }}
+          style={{ backgroundColor: 'rgba(9,7,5,0.95)', backdropFilter: 'blur(4px)' }}
           onClick={() => {
             setShowLevelUp(false);
             clearSignals();
@@ -96,7 +96,7 @@ const GameNotifications: React.FC = () => {
             <h1
               className="stat-number text-6xl font-black mb-3"
               style={{
-                background: 'linear-gradient(135deg, #8B5CF6, #38BDF8)',
+                background: 'linear-gradient(135deg, #D88C3A, #F3C98B)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
@@ -107,7 +107,7 @@ const GameNotifications: React.FC = () => {
             <p
               className="stat-number text-8xl font-black mt-2"
               style={{
-                background: 'linear-gradient(135deg, #8B5CF6, #38BDF8)',
+                background: 'linear-gradient(135deg, #D88C3A, #F3C98B)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}

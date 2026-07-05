@@ -10,7 +10,7 @@ interface AvatarPickerModalProps {
 const AvatarPickerModal: React.FC<AvatarPickerModalProps> = ({ avatarId, onClose, onSelect }) => (
   <div
     className="fixed inset-0 z-[90] flex items-center justify-center p-4"
-    style={{ backgroundColor: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(4px)' }}
+    style={{ backgroundColor: 'rgba(9,7,5,0.9)', backdropFilter: 'blur(4px)' }}
     onClick={onClose}
     role="dialog"
     aria-modal="true"
@@ -18,7 +18,7 @@ const AvatarPickerModal: React.FC<AvatarPickerModalProps> = ({ avatarId, onClose
   >
     <div
       className="bg-card rounded-2xl p-6 max-w-sm w-full"
-      style={{ border: '1px solid rgba(139,92,246,0.2)' }}
+      style={{ border: '1px solid rgba(216,140,58,0.2)' }}
       onClick={(e) => e.stopPropagation()}
     >
       <h3 id="avatar-picker-title" className="text-lg font-bold text-text-primary mb-4 text-center">

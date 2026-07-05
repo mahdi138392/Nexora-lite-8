@@ -47,7 +47,7 @@ const Profile: React.FC = () => {
 
           {/* Header */}
           <div className="relative overflow-hidden premium-surface-strong rounded-[2rem] p-6 lg:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(155,109,255,0.18),transparent_32%),radial-gradient(circle_at_88%_12%,rgba(251,191,36,0.14),transparent_30%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(216,140,58,0.18),transparent_32%),radial-gradient(circle_at_88%_12%,rgba(251,191,36,0.14),transparent_30%)]" />
             <div className="relative z-10 flex flex-col sm:flex-row items-start gap-6">
               <div className="flex flex-col items-center flex-shrink-0">
                 {avatarId ? (
@@ -147,8 +147,8 @@ const Profile: React.FC = () => {
           <div className="premium-surface rounded-[1.5rem] p-6">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
-                <Flame size={28} className="text-orange-500" />
-                <span className="stat-number text-3xl font-black text-orange-500">{gameState.streak} Day Streak</span>
+                <Flame size={28} className="text-primary" />
+                <span className="stat-number text-3xl font-black text-primary">{gameState.streak} Day Streak</span>
               </div>
               <span className="text-gold text-xs">150 XP potential</span>
             </div>
@@ -166,7 +166,7 @@ const Profile: React.FC = () => {
                   <div
                     key={ach.id}
                     className={`rounded-2xl p-4 transition-all ${unlocked ? 'bg-gold/10 shadow-gold-glow' : 'bg-secondary-layer/70 opacity-60'}`}
-                    style={{ border: unlocked ? '1px solid rgba(251,191,36,0.5)' : '1px solid rgba(139,92,246,0.1)' }}
+                    style={{ border: unlocked ? '1px solid rgba(251,191,36,0.5)' : '1px solid rgba(216,140,58,0.1)' }}
                   >
                     <span className={`text-3xl block ${unlocked ? '' : 'grayscale'}`}>{ach.icon}</span>
                     <p className="text-xs font-semibold text-text-primary mt-2">{ach.name}</p>
@@ -195,9 +195,9 @@ const Profile: React.FC = () => {
             </div>
             <div className="space-y-3">
               {[
-                { label: 'General Knowledge', count: catCounts.general, color: '#38BDF8' },
+                { label: 'General Knowledge', count: catCounts.general, color: '#F3C98B' },
                 { label: 'Football', count: catCounts.football, color: '#10B981' },
-                { label: 'AI & Technology', count: catCounts.ai, color: '#8B5CF6' },
+                { label: 'AI & Technology', count: catCounts.ai, color: '#D88C3A' },
               ].map((c) => (
                 <div key={c.label} className="flex items-center gap-3">
                   <span className="text-xs text-text-secondary w-36">{c.label}</span>

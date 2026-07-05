@@ -53,7 +53,7 @@ interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const buttonVariants: Record<NonNullable<ActionButtonProps['variant']>, string> = {
   primary: 'premium-button text-white',
   secondary: 'border border-white/10 bg-white/[0.035] text-text-primary hover:border-brand-purple/45',
-  danger: 'border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/15',
+  danger: 'border border-danger/40 bg-danger/10 text-danger hover:bg-danger/15',
 };
 
 export const ActionButton: React.FC<ActionButtonProps> = ({

@@ -91,7 +91,7 @@ const Leaderboard: React.FC = () => {
       <main className="lg:pl-60 px-4 product-page-enter">
         <div className="max-w-6xl mx-auto space-y-8">
           <section className="relative overflow-hidden rounded-[2rem] premium-surface-strong p-6 lg:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(251,191,36,0.18),transparent_28%),radial-gradient(circle_at_86%_15%,rgba(139,92,246,0.18),transparent_34%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(251,191,36,0.18),transparent_28%),radial-gradient(circle_at_86%_15%,rgba(216,140,58,0.18),transparent_34%)]" />
             <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 border border-gold/25 px-4 py-2 text-xs font-black text-gold mb-4">
@@ -189,7 +189,7 @@ const Leaderboard: React.FC = () => {
         </div>
       </main>
 
-      <div className="fixed bottom-16 lg:bottom-0 left-0 w-full z-40 border-t border-brand-purple/30 bg-bg-primary/85 px-4 py-3 backdrop-blur-xl">
+      <div className="fixed bottom-16 lg:bottom-0 left-0 w-full z-40 border-t border-brand-purple/30 bg-bg-primary/85 px-4 py-3 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 text-sm">
           {isConnected ? (
             <>

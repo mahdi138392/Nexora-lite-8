@@ -53,7 +53,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   return (
     <div
       className="fixed inset-0 z-[90] flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(4px)' }}
+      style={{ backgroundColor: 'rgba(9,7,5,0.9)', backdropFilter: 'blur(4px)' }}
       onClick={onClose}
     >
       <div
@@ -96,9 +96,9 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         ) : error ? (
           <div className="text-center py-4">
             <div className="mb-4">
-              <X size={64} className="text-red-500 mx-auto" />
+              <X size={64} className="text-danger mx-auto" />
             </div>
-            <h3 className="text-2xl font-bold text-red-500 mb-2">Purchase Failed</h3>
+            <h3 className="text-2xl font-bold text-danger mb-2">Purchase Failed</h3>
             <p className="text-text-secondary text-sm mb-6">{error}</p>
             <div className="flex flex-col sm:flex-row gap-3">
               <button
@@ -350,7 +350,7 @@ const Shop: React.FC = () => {
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-transparent pt-20 lg:pt-24 pb-20 lg:pb-8 flex items-center justify-center px-4">
-        <div className="bg-card rounded-2xl p-8 lg:p-10 text-center max-w-md w-full" style={{ border: '1px solid rgba(139,92,246,0.2)' }}>
+        <div className="bg-card rounded-2xl p-8 lg:p-10 text-center max-w-md w-full" style={{ border: '1px solid rgba(216,140,58,0.2)' }}>
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-purple/10 mb-6">
             <Wallet size={32} className="text-brand-purple" />
           </div>
@@ -390,7 +390,7 @@ const Shop: React.FC = () => {
       rarity: 'Premium · Legendary',
       price: '0.05',
       icon: Crown,
-      accent: '#8B5CF6',
+      accent: '#D88C3A',
       frame: 'border-brand-purple/35 bg-brand-purple/[0.04]',
       description: 'Permanent prestige for your identity, profile, and leaderboard presence.',
       benefits: ['Premium badge on profile', 'Special status in leaderboard rows', 'Permanent account recognition', 'Never expires'],
@@ -408,7 +408,7 @@ const Shop: React.FC = () => {
       <main className="lg:pl-60 product-page-enter">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <section className="relative overflow-hidden rounded-[2rem] premium-surface-strong p-6 lg:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(251,191,36,0.18),transparent_30%),radial-gradient(circle_at_82%_5%,rgba(55,213,255,0.14),transparent_34%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(251,191,36,0.18),transparent_30%),radial-gradient(circle_at_82%_5%,rgba(243,201,139,0.14),transparent_34%)]" />
             <div className="relative z-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 border border-gold/25 px-4 py-2 text-xs font-black text-gold mb-4">

@@ -11,7 +11,7 @@ const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center px-4">
       <div
         className="premium-surface-strong rounded-2xl p-10 max-w-sm w-full text-center"
-        style={{ border: '1px solid rgba(139,92,246,0.2)' }}
+        style={{ border: '1px solid rgba(216,140,58,0.2)' }}
       >
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-brand-purple/10 mb-6 mx-auto">
           <Lock size={40} className="text-brand-purple" />

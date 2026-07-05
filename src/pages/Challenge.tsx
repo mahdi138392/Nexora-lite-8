@@ -78,7 +78,7 @@ const categories: Category[] = [
     gradient: 'from-brand-purple/24 via-brand-purple/8 to-transparent',
     xpRange: '10–40 XP',
     icon: BrainIcon,
-    iconColor: '#8B5CF6',
+    iconColor: '#D88C3A',
     symbol: '🧠',
   },
   {
@@ -91,7 +91,7 @@ const categories: Category[] = [
     gradient: 'from-interactive-cyan/22 via-interactive-cyan/8 to-transparent',
     xpRange: '10–40 XP',
     icon: FootballIcon,
-    iconColor: '#38BDF8',
+    iconColor: '#F3C98B',
     symbol: '⚽',
   },
   {
@@ -100,11 +100,11 @@ const categories: Category[] = [
     shortName: 'AI Tech',
     tagline: 'The Signal Ritual',
     description: 'AI, machine learning, Web3, blockchain, robotics, and future systems.',
-    tone: 'text-success-emerald',
-    gradient: 'from-success-emerald/22 via-brand-purple/10 to-transparent',
+    tone: 'text-gold',
+    gradient: 'from-gold/18 via-brand-purple/8 to-transparent',
     xpRange: '15–60 XP',
     icon: CircuitIcon,
-    iconColor: '#10B981',
+    iconColor: '#F3C98B',
     symbol: '🤖',
     hasHighestXP: true,
   },
@@ -118,8 +118,8 @@ const difficulties: Difficulty[] = [
     description: 'A clean warm-up with familiar facts and quick confidence.',
     stakes: 'Low risk',
     pace: 'Fast read',
-    borderColor: '#10B981',
-    glow: 'rgba(16,185,129,0.22)',
+    borderColor: '#8E857A',
+    glow: 'rgba(142,133,122,0.16)',
   },
   {
     id: 'medium',
@@ -128,8 +128,8 @@ const difficulties: Difficulty[] = [
     description: 'A sharper test that rewards focus and specific knowledge.',
     stakes: 'Balanced',
     pace: 'Focused',
-    borderColor: '#38BDF8',
-    glow: 'rgba(56,189,248,0.22)',
+    borderColor: '#F3C98B',
+    glow: 'rgba(243,201,139,0.14)',
   },
   {
     id: 'hard',
@@ -138,8 +138,8 @@ const difficulties: Difficulty[] = [
     description: 'High-intensity questions for expert-level momentum.',
     stakes: 'High reward',
     pace: 'Intense',
-    borderColor: '#8B5CF6',
-    glow: 'rgba(139,92,246,0.24)',
+    borderColor: '#D88C3A',
+    glow: 'rgba(216,140,58,0.16)',
   },
 ];
 
@@ -421,7 +421,7 @@ const Challenge: React.FC = () => {
       </div>
 
       {aiError && (
-        <div className="rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-300">
+        <div className="rounded-2xl border border-danger/25 bg-danger/10 p-4 text-sm text-danger">
           <span className="font-bold">Signal interrupted.</span> {aiError}
         </div>
       )}
@@ -431,7 +431,7 @@ const Challenge: React.FC = () => {
   const renderLoading = () => renderShell(
     <div className="flex min-h-[70vh] items-center justify-center">
       <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] premium-surface-strong p-8 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(55,213,255,0.16),transparent_42%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(243,201,139,0.16),transparent_42%)]" />
         <div className="relative z-10">
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full border border-brand-purple/30 bg-brand-purple/10">
             <Loader2 size={44} className="animate-spin text-interactive-cyan" />
@@ -459,7 +459,7 @@ const Challenge: React.FC = () => {
     const progress = (timeLeft / 30) * 100;
     const circumference = 2 * Math.PI * 45;
     const strokeDashoffset = circumference - (progress / 100) * circumference;
-    const timerColor = timeLeft <= 8 ? '#EF4444' : timeLeft <= 15 ? '#FBBF24' : '#38BDF8';
+    const timerColor = timeLeft <= 8 ? '#EF4444' : timeLeft <= 15 ? '#FBBF24' : '#F3C98B';
 
     return renderShell(
       <div className="max-w-3xl mx-auto space-y-5">
@@ -522,7 +522,7 @@ const Challenge: React.FC = () => {
                     disabled={isSubmitting}
                     className={`group flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-200 ${
                       isSelected
-                        ? 'border-interactive-cyan bg-interactive-cyan/10 shadow-[0_0_0_4px_rgba(56,189,248,0.10)]'
+                        ? 'border-interactive-cyan bg-interactive-cyan/10 shadow-[0_0_0_4px_rgba(243,201,139,0.10)]'
                         : 'border-white/5 bg-secondary-layer/80 hover:border-brand-purple/45 hover:bg-white/[0.035]'
                     }`}
                   >
@@ -560,12 +560,12 @@ const Challenge: React.FC = () => {
 
     return renderShell(
       <div className="flex min-h-[72vh] items-center justify-center">
-        <div className={`w-full max-w-3xl overflow-hidden rounded-[2rem] premium-surface-strong ${isCorrect ? 'border-success-emerald/30' : 'border-red-500/25'}`}>
-          <div className={`p-7 text-center sm:p-9 ${isCorrect ? 'bg-success-emerald/5' : 'bg-red-500/5'}`}>
-            <div className={`mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full ${isCorrect ? 'bg-success-emerald/15 text-success-emerald' : 'bg-red-500/15 text-red-400'}`}>
+        <div className={`w-full max-w-3xl overflow-hidden rounded-[2rem] premium-surface-strong ${isCorrect ? 'border-success-emerald/30' : 'border-danger/25'}`}>
+          <div className={`p-7 text-center sm:p-9 ${isCorrect ? 'bg-success-emerald/5' : 'bg-danger/5'}`}>
+            <div className={`mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full ${isCorrect ? 'bg-success-emerald/15 text-success-emerald' : 'bg-danger/15 text-danger'}`}>
               {isCorrect ? <CheckCircle size={58} /> : <XCircle size={58} />}
             </div>
-            <p className={`eyebrow-label text-xs ${isCorrect ? 'text-success-emerald' : 'text-red-400'}`}>{isCorrect ? 'Ritual complete' : 'Ritual failed'}</p>
+            <p className={`eyebrow-label text-xs ${isCorrect ? 'text-success-emerald' : 'text-danger'}`}>{isCorrect ? 'Ritual complete' : 'Ritual failed'}</p>
             <h1 className="mt-2 text-4xl font-black text-text-primary">{isCorrect ? 'Correct signal' : 'Signal missed'}</h1>
             <p className="mx-auto mt-3 max-w-xl text-text-secondary">
               {isCorrect ? 'Your profile gains momentum. Bank the XP, protect the streak, and keep climbing.' : 'No XP this round. Study the explanation and re-enter the ritual with sharper focus.'}
@@ -579,9 +579,9 @@ const Challenge: React.FC = () => {
               <p className="stat-number mt-1 text-3xl font-black text-gold">+{earnedXP}</p>
             </div>
             <div className="rounded-2xl bg-bg-primary/35 p-4 text-center">
-              <Flame size={22} className="mx-auto mb-2 text-orange-400" />
+              <Flame size={22} className="mx-auto mb-2 text-primary" />
               <p className="text-xs text-text-secondary">Streak reward</p>
-              <p className="stat-number mt-1 text-3xl font-black text-orange-400">+{streakXP}</p>
+              <p className="stat-number mt-1 text-3xl font-black text-primary">+{streakXP}</p>
             </div>
             <div className="rounded-2xl bg-bg-primary/35 p-4 text-center">
               <Brain size={22} className="mx-auto mb-2 text-interactive-cyan" />
@@ -597,7 +597,7 @@ const Challenge: React.FC = () => {
               <div className="my-4 h-px bg-white/5" />
               <p className="text-sm leading-relaxed text-text-secondary">{currentQuestion?.explanation}</p>
               {isCorrect && streakXP > 0 && (
-                <p className="mt-4 rounded-xl bg-orange-500/10 px-4 py-3 text-sm font-bold text-orange-300">
+                <p className="mt-4 rounded-xl bg-primary/10 px-4 py-3 text-sm font-bold text-primary">
                   Day {resultMeta?.streakDay} streak activated for +{streakXP} bonus XP.
                 </p>
               )}

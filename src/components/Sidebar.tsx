@@ -56,7 +56,7 @@ const Sidebar: React.FC = () => {
           {isConnected && (
             <button
               onClick={disconnectWallet}
-              className="focus-ring mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/25 px-3 py-2 text-sm font-bold text-red-300 transition-colors hover:bg-red-500/10"
+              className="focus-ring mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-danger/25 px-3 py-2 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
             >
               <LogOut size={15} />
               Disconnect

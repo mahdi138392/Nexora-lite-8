@@ -121,7 +121,7 @@ const Dashboard: React.FC = () => {
       <main className="lg:pl-60 product-page-enter">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           <section className="relative overflow-hidden rounded-[2rem] premium-surface-strong p-6 lg:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(55,213,255,0.18),transparent_30%),radial-gradient(circle_at_15%_15%,rgba(155,109,255,0.22),transparent_32%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(243,201,139,0.18),transparent_30%),radial-gradient(circle_at_15%_15%,rgba(216,140,58,0.22),transparent_32%)]" />
             <div className="relative z-10 grid gap-6 lg:grid-cols-[1.35fr_0.65fr] lg:items-stretch">
               <div className="space-y-6">
                 <div className="flex flex-wrap items-center gap-3">
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="rounded-2xl bg-secondary-layer/70 border border-white/5 p-4">
                     <div className="flex items-center gap-2 text-text-secondary text-xs font-bold uppercase tracking-[0.08em]"><Flame size={14} /> Streak</div>
-                    <p className="mt-2 font-bold text-orange-400">Day {gameState.streak || 0} · +{nextStreakXP} XP next</p>
+                    <p className="mt-2 font-bold text-primary">Day {gameState.streak || 0} · +{nextStreakXP} XP next</p>
                   </div>
                 </div>
               </div>
@@ -169,7 +169,7 @@ const Dashboard: React.FC = () => {
                     <span>{gameState.levelProgress}%</span>
                   </div>
                   <div className="mt-3 h-4 rounded-full bg-secondary-layer overflow-hidden">
-                    <div className="h-full rounded-full bg-gradient-brand shadow-[0_0_24px_rgba(155,109,255,0.45)] transition-all" style={{ width: `${gameState.levelProgress}%` }} />
+                    <div className="h-full rounded-full bg-gradient-brand shadow-[0_10px_24px_rgba(0,0,0,0.28)] transition-all" style={{ width: `${gameState.levelProgress}%` }} />
                   </div>
                   <p className="mt-3 text-sm text-text-secondary">
                     {gameState.xpToNextLevel} XP until Level {gameState.level + 1}. Recent movement: <span className="font-bold text-gold">+{recentXp} XP</span> from your latest runs.
@@ -263,7 +263,7 @@ const Dashboard: React.FC = () => {
             <div className="premium-surface rounded-3xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="eyebrow-label text-orange-400 text-xs">Streak tracking</p>
+                  <p className="eyebrow-label text-primary text-xs">Streak tracking</p>
                   <h2 className="text-xl font-black text-text-primary mt-1">Daily chain</h2>
                 </div>
                 <span className="text-sm font-bold text-text-secondary">Last: {formatDate(gameState.lastActiveDate)}</span>
@@ -274,7 +274,7 @@ const Dashboard: React.FC = () => {
                   const isCurrent = day === gameState.streak + 1 && gameState.streak < 5;
                   return (
                     <div key={day} className="flex flex-col items-center flex-1">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isCompleted ? 'bg-orange-500/15 border-orange-400 text-orange-400' : isCurrent ? 'bg-interactive-cyan/10 border-interactive-cyan text-interactive-cyan shadow-[0_0_0_4px_rgba(56,189,248,0.12)]' : 'bg-secondary-layer border-white/5 text-text-secondary/50'}`}>
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isCompleted ? 'bg-primary/15 border-primary text-primary' : isCurrent ? 'bg-interactive-cyan/10 border-interactive-cyan text-interactive-cyan shadow-[0_0_0_4px_rgba(243,201,139,0.12)]' : 'bg-secondary-layer border-white/5 text-text-secondary/50'}`}>
                         {isCompleted ? <CheckCircle size={18} /> : <span className="font-black">{day}</span>}
                       </div>
                       <p className="text-[11px] text-text-secondary mt-2">+{STREAK_BONUS[day]}</p>
@@ -283,7 +283,7 @@ const Dashboard: React.FC = () => {
                 })}
               </div>
               <div className="mt-5 rounded-2xl bg-secondary-layer/70 p-4 text-sm text-text-secondary flex items-center gap-3">
-                <Flame className="text-orange-400" size={20} />
+                <Flame className="text-primary" size={20} />
                 Complete all 5 days for <span className="text-gold font-black">150 XP</span> in streak rewards.
               </div>
             </div>
@@ -310,8 +310,8 @@ const Dashboard: React.FC = () => {
                 <div className="divide-y divide-secondary-layer">
                   {gameState.challengeHistory.slice(0, 5).map((record: ChallengeRecord) => (
                     <div key={record.id} className="flex items-center gap-3 py-3">
-                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${record.isCorrect ? 'bg-success-emerald/10' : 'bg-red-500/10'}`}>
-                        {record.isCorrect ? <CheckCircle size={18} className="text-success-emerald" /> : <XCircle size={18} className="text-red-500" />}
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${record.isCorrect ? 'bg-success-emerald/10' : 'bg-danger/10'}`}>
+                        {record.isCorrect ? <CheckCircle size={18} className="text-success-emerald" /> : <XCircle size={18} className="text-danger" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-text-primary font-bold text-sm">{record.isCorrect ? 'Correct answer' : 'Missed answer'}</p>
