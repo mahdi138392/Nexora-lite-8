@@ -14,6 +14,13 @@ import {
   saveTransactionDB,
   syncUserToDB,
 } from '../lib/database';
+import {
+  calcLevel,
+  calcLevelProgress,
+  calcXPToNext,
+  calcRankScore,
+  calcRank,
+} from '../lib/gameCalculations';
 import { calculateStreak, getToday, normalizeStreakTimestamp } from '../lib/streak';
 
 // ============== TYPES ==============
@@ -78,30 +85,6 @@ const STREAK_BONUS: Record<number, number> = {
 const STORAGE_KEY = 'nexora_game_v2';
 
 // ============== CALCULATIONS ==============
-
-function calcLevel(xp: number): number {
-  return Math.floor(xp / 100);
-}
-
-function calcLevelProgress(xp: number): number {
-  return xp % 100;
-}
-
-function calcXPToNext(xp: number): number {
-  return (Math.floor(xp / 100) + 1) * 100 - xp;
-}
-
-function calcRankScore(xp: number, correct: number, total: number): number {
-  const acc = total > 0 ? correct / total : 0;
-  return Math.round(xp * 0.5 + correct * 10 + acc * 100 + total * 2);
-}
-
-function calcRank(score: number): RankType {
-  if (score >= 1000) return 'Gold';
-  if (score >= 500) return 'Silver';
-  if (score >= 200) return 'Bronze';
-  return 'Beginner';
-}
 
 export const RANK_COLORS: Record<RankType, string> = {
   Beginner: '#64748B',
