@@ -25,10 +25,36 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  const apiKeys = [
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_API_KEY_2,
+    process.env.GEMINI_API_KEY_3,
+  ].filter((key): key is string => Boolean(key));
+
+  if (apiKeys.length === 0) {
     res.status(500).json({ error: 'Server missing GEMINI_API_KEY' });
     return;
+  }
+
+  async function callGeminiWithKey(key: string, prompt: string) {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.9, maxOutputTokens: 800 },
+        }),
+      }
+    );
+    if (!response.ok) {
+      const errText = await response.text();
+      const err = new Error(`Gemini API returned ${response.status}: ${errText}`);
+      (err as { status?: number }).status = response.status;
+      throw err;
+    }
+    return response.json();
   }
 
   const prompt = `You are a quiz question generator for Nexora, a competitive learning platform.
@@ -49,52 +75,50 @@ Return EXACTLY this JSON (nothing else):
 {"question":"Your question here?","options":{"A":"First option","B":"Second option","C":"Third option","D":"Fourth option"},"correct":"B","explanation":"Brief factual explanation."}`;
 
   let lastError = 'Unknown error';
+  let data: any = null;
 
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.9, maxOutputTokens: 800 },
-          }),
+  outer: for (let attempt = 1; attempt <= 2; attempt++) {
+    for (const key of apiKeys) {
+      try {
+        data = await callGeminiWithKey(key, prompt);
+        break outer;
+      } catch (err: any) {
+        lastError = err?.message || 'Unknown error';
+        const status = err?.status;
+        if (status === 429 || status === 403) {
+          // quota/auth issue on this key — try the next key
+          continue;
         }
-      );
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Gemini API returned ${response.status}: ${errText}`);
-      }
-
-      const data = await response.json();
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-      const cleaned = rawText
-        .trim()
-        .replace(/^```(?:json)?\s*/i, '')
-        .replace(/\s*```$/, '')
-        .trim();
-
-      const parsed = JSON.parse(cleaned);
-
-      if (!parsed.question || !parsed.options || !parsed.correct || !parsed.explanation) {
-        throw new Error('AI response missing required fields');
-      }
-      if (!['A', 'B', 'C', 'D'].includes(parsed.correct)) {
-        throw new Error('AI returned invalid correct answer key');
-      }
-
-      res.status(200).json(parsed);
-      return;
-    } catch (err: any) {
-      lastError = err?.message || 'Unknown error';
-      if (attempt < 2) {
-        await new Promise((r) => setTimeout(r, 600));
+        // some other error — still try next key as a safety net,
+        // but don't treat it as expected
+        continue;
       }
     }
+    if (data) break;
+    await new Promise((r) => setTimeout(r, 600));
   }
 
-  res.status(502).json({ error: `Failed to generate question: ${lastError}` });
+  if (!data) {
+    res.status(502).json({ error: `Failed to generate question: ${lastError}` });
+    return;
+  }
+
+  const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  const cleaned = rawText
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim();
+
+  const parsed = JSON.parse(cleaned);
+
+  if (!parsed.question || !parsed.options || !parsed.correct || !parsed.explanation) {
+    throw new Error('AI response missing required fields');
+  }
+  if (!['A', 'B', 'C', 'D'].includes(parsed.correct)) {
+    throw new Error('AI returned invalid correct answer key');
+  }
+
+  res.status(200).json(parsed);
+  return;
 }
