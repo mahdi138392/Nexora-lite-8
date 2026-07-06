@@ -170,7 +170,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 };
 
 const Shop: React.FC = () => {
-  const { isConnected, isCorrectNetwork, connectWallet, switchToRitual, purchaseItem, getRitualBalance } = useWallet();
+  const { isConnected, isCorrectNetwork, connectWallet, switchToRitual, checkLiveNetwork, purchaseItem, getRitualBalance } = useWallet();
   const { xpBoosterActive, xpBoosterExpiry, premiumStatus, setXPBooster, setPremium } = useGame();
   const { showToast } = useToast();
 
@@ -284,8 +284,9 @@ const Shop: React.FC = () => {
     handleBuy(itemType);
   };
 
-  const openConfirmModal = (itemType: ItemType) => {
-    if (!isCorrectNetwork) {
+  const openConfirmModal = async (itemType: ItemType) => {
+    const isOnRitual = await checkLiveNetwork();
+    if (!isOnRitual) {
       if (itemType === 'xp_booster') {
         setBoosterError('⚠️ Switch to Ritual Network to complete this purchase');
       } else {
@@ -488,6 +489,30 @@ const Shop: React.FC = () => {
                         manually select the Ritual network from your network list, then
                         come back and tap the purchase button again.
                       </p>
+                      <div className="mt-3 rounded-xl border border-interactive-cyan/25 bg-secondary-layer p-3 text-xs text-text-secondary">
+                        <p className="mb-2">
+                          If the automatic switch doesn't work, manually add/select this
+                          network in your wallet app:
+                        </p>
+                        <ul className="mb-3 space-y-0.5 font-mono">
+                          <li>Network Name: Ritual</li>
+                          <li>RPC URL: https://rpc.ritualfoundation.org</li>
+                          <li>Chain ID: 1979</li>
+                          <li>Currency Symbol: RITUAL</li>
+                        </ul>
+                        <button
+                          onClick={async () => {
+                            const ok = await checkLiveNetwork();
+                            if (ok) {
+                              setBoosterError(null);
+                              setPremiumError(null);
+                            }
+                          }}
+                          className="rounded-lg border border-interactive-cyan/40 px-3 py-1.5 font-bold text-interactive-cyan"
+                        >
+                          I've switched — Check Again
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

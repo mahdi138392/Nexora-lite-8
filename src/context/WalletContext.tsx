@@ -50,6 +50,7 @@ interface WalletContextType {
   connectWallet: () => Promise<boolean>;
   disconnectWallet: () => void;
   switchToRitual: () => Promise<void>;
+  checkLiveNetwork: () => Promise<boolean>;
   getRitualBalance: () => Promise<string>;
   purchaseItem: (
     price: string,
@@ -221,6 +222,20 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     );
   };
 
+  const checkLiveNetwork = useCallback(async (): Promise<boolean> => {
+    if (!window.ethereum) return false;
+    try {
+      const chainId = (await window.ethereum.request({
+        method: 'eth_chainId',
+      })) as string;
+      const isCorrect = chainId === RITUAL_CHAIN_ID;
+      setIsCorrectNetwork(isCorrect);
+      return isCorrect;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const getRitualBalance = useCallback(async (): Promise<string> => {
     if (!window.ethereum || !walletAddress) return '0';
 
@@ -341,6 +356,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         connectWallet,
         disconnectWallet,
         switchToRitual,
+        checkLiveNetwork,
         getRitualBalance,
         purchaseItem,
       }}
