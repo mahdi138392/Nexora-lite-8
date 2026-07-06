@@ -170,7 +170,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 };
 
 const Shop: React.FC = () => {
-  const { isConnected, isCorrectNetwork, connectWallet, switchToRitual, checkLiveNetwork, purchaseItem, getRitualBalance } = useWallet();
+  const { walletAddress, isConnected, isCorrectNetwork, connectWallet, switchToRitual, checkLiveNetwork, purchaseItem, getRitualBalance } = useWallet();
   const { xpBoosterActive, xpBoosterExpiry, premiumStatus, setXPBooster, setPremium } = useGame();
   const { showToast } = useToast();
 
@@ -232,6 +232,19 @@ const Shop: React.FC = () => {
   const getItemName = (itemType: ItemType) =>
     itemType === 'xp_booster' ? 'XP Booster' : 'Premium Pass';
 
+  const verifyPurchase = async (itemType: ItemType, txHash: string) => {
+    const verifyResponse = await fetch('/api/verify-purchase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ walletAddress, itemType, txHash }),
+    });
+
+    if (!verifyResponse.ok) {
+      const errBody = await verifyResponse.json().catch(() => ({}));
+      throw new Error(errBody.error || 'Purchase verification failed');
+    }
+  };
+
   const handleBuy = async (itemType: ItemType) => {
     const price = itemType === 'xp_booster' ? '0.01' : '0.05';
     const setLoading = itemType === 'xp_booster' ? setLoadingBooster : setLoadingPremium;
@@ -242,6 +255,7 @@ const Shop: React.FC = () => {
 
     try {
       const txHash = await purchaseItem(price, itemType);
+      await verifyPurchase(itemType, txHash);
 
       if (itemType === 'xp_booster') {
         setXPBooster(txHash);
@@ -313,6 +327,8 @@ const Shop: React.FC = () => {
 
     try {
       const txHash = await purchaseItem(price, itemType);
+      await verifyPurchase(itemType, txHash);
+
       if (itemType === 'xp_booster') {
         setXPBooster(txHash);
       } else {
