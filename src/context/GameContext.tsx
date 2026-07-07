@@ -300,12 +300,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [gameState.xpBoosterActive, gameState.xpBoosterExpiry]);
 
   const updateState = useCallback(
-    (
-      updater: (prev: GameState) => GameState,
-      prevLevel: number,
-      prevRank: RankType
-    ) => {
+    (updater: (prev: GameState) => GameState) => {
       setGameState((prev) => {
+        const prevLevel = prev.level;
+        const prevRank = prev.rank;
         const next = updater(prev);
         const level = calcLevel(next.totalXP);
         const levelProgress = calcLevelProgress(next.totalXP);
@@ -360,13 +358,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       ) {
         base = Math.ceil(base * 1.5);
       }
-      const prevLevel = gameState.level;
-      const prevRank = gameState.rank;
-      updateState(
-        (prev) => ({ ...prev, totalXP: prev.totalXP + base }),
-        prevLevel,
-        prevRank
-      );
+      updateState((prev) => ({ ...prev, totalXP: prev.totalXP + base }));
       setXpGainSignal(base);
       return base;
     },
@@ -375,23 +367,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const addChallenge = useCallback(
     (record: ChallengeRecord) => {
-      const prevLevel = gameState.level;
-      const prevRank = gameState.rank;
-      updateState(
-        (prev) => ({
-          ...prev,
-          correctAnswers: prev.correctAnswers + (record.isCorrect ? 1 : 0),
-          totalChallenges: prev.totalChallenges + 1,
-          challengeHistory: [record, ...prev.challengeHistory].slice(0, 100),
-        }),
-        prevLevel,
-        prevRank
-      );
+      updateState((prev) => ({
+        ...prev,
+        correctAnswers: prev.correctAnswers + (record.isCorrect ? 1 : 0),
+        totalChallenges: prev.totalChallenges + 1,
+        challengeHistory: [record, ...prev.challengeHistory].slice(0, 100),
+      }));
       if (currentWalletRef.current) {
         saveChallengeDB(currentWalletRef.current, record);
       }
     },
-    [gameState, updateState]
+    [updateState]
   );
 
   const checkStreak = useCallback(() => {
@@ -410,29 +396,22 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Continue without a cross-tab lock if storage is unavailable.
     }
 
-    const prevLevel = gameState.level;
-    const prevRank = gameState.rank;
+    updateState((prev) => {
+      const result = calculateStreak(prev.streak, prev.lastActiveDate, now);
+      if (!result.shouldGrantReward) return prev;
 
-    updateState(
-      (prev) => {
-        const result = calculateStreak(prev.streak, prev.lastActiveDate, now);
-        if (!result.shouldGrantReward) return prev;
+      const bonusXP = STREAK_BONUS[result.streak] ?? 10;
+      setStreakBonusSignal({ day: result.streak, xp: bonusXP });
 
-        const bonusXP = STREAK_BONUS[result.streak] ?? 10;
-        setStreakBonusSignal({ day: result.streak, xp: bonusXP });
+      return {
+        ...prev,
+        streak: result.streak,
+        lastActiveDate: today,
+        totalXP: prev.totalXP + bonusXP,
+      };
+    });
 
-        return {
-          ...prev,
-          streak: result.streak,
-          lastActiveDate: today,
-          totalXP: prev.totalXP + bonusXP,
-        };
-      },
-      prevLevel,
-      prevRank
-    );
-
-  }, [gameState.level, gameState.rank, updateState]);
+  }, [updateState]);
 
   const unlockAchievement = useCallback(
     (id: string) => {
@@ -452,8 +431,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const setPremium = useCallback(
     (txHash: string) => {
-      const prevLevel = gameState.level;
-      const prevRank = gameState.rank;
       const ts = new Date().toISOString();
       const newTx: Transaction = {
         hash: txHash,
@@ -461,21 +438,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         amount: '0.05',
         timestamp: Date.now(),
       };
-      updateState(
-        (prev) => ({
-          ...prev,
-          premiumStatus: true,
-          premiumPurchasedAt: ts,
-          transactions: [newTx, ...prev.transactions],
-        }),
-        prevLevel,
-        prevRank
-      );
+      updateState((prev) => ({
+        ...prev,
+        premiumStatus: true,
+        premiumPurchasedAt: ts,
+        transactions: [newTx, ...prev.transactions],
+      }));
       if (currentWalletRef.current) {
         saveTransactionDB(currentWalletRef.current, newTx);
       }
     },
-    [gameState, updateState]
+    [updateState]
   );
 
   const setXPBooster = useCallback((txHash: string) => {
