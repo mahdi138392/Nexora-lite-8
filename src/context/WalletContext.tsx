@@ -269,21 +269,33 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const signer = await provider.getSigner();
       const signerAddress = await signer.getAddress();
 
-      console.log('[Purchase] Signer address:', signerAddress);
-      console.log('[Purchase] Chain ID:', chainId);
-      console.log('[Purchase] Sending', price, 'RITUAL to', FEE_RECIPIENT);
+      if (import.meta.env.DEV) {
+        console.log('[Purchase] Signer address:', signerAddress);
+      }
+      if (import.meta.env.DEV) {
+        console.log('[Purchase] Chain ID:', chainId);
+      }
+      if (import.meta.env.DEV) {
+        console.log('[Purchase] Sending', price, 'RITUAL to', FEE_RECIPIENT);
+      }
 
       const balance = await provider.getBalance(signerAddress);
-      console.log('[Purchase] Current balance (wei):', balance.toString());
+      if (import.meta.env.DEV) {
+        console.log('[Purchase] Current balance (wei):', balance.toString());
+      }
 
       const tx = await signer.sendTransaction({
         to: FEE_RECIPIENT,
         value: ethers.parseEther(price),
       });
 
-      console.log('[Purchase] Transaction submitted:', tx.hash);
+      if (import.meta.env.DEV) {
+        console.log('[Purchase] Transaction submitted:', tx.hash);
+      }
       await tx.wait();
-      console.log('[Purchase] Transaction confirmed:', tx.hash);
+      if (import.meta.env.DEV) {
+        console.log('[Purchase] Transaction confirmed:', tx.hash);
+      }
       return tx.hash;
     } catch (err: unknown) {
       console.error('[Purchase] Full error object:', err);
