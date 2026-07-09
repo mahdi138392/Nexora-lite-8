@@ -20,6 +20,8 @@ import {
   calcXPToNext,
   calcRankScore,
   calcRank,
+  XP_TABLE,
+  STREAK_BONUS,
 } from '../lib/gameCalculations';
 import { calculateStreak, getToday, normalizeStreakTimestamp } from '../lib/streak';
 
@@ -45,6 +47,18 @@ export interface Transaction {
   timestamp: number;
 }
 
+export interface ServerAnswerResult {
+  isCorrect: boolean;
+  xpEarned: number;
+  streakBonus: number;
+  newStreak: number;
+  totalXP: number;
+  correctAnswers: number;
+  totalChallenges: number;
+  category: CategoryType;
+  difficulty: DifficultyType;
+}
+
 export interface GameState {
   totalXP: number;
   level: number;
@@ -67,20 +81,6 @@ export interface GameState {
 }
 
 // ============== CONSTANTS ==============
-
-const XP_TABLE: Record<CategoryType, Record<DifficultyType, number>> = {
-  general: { easy: 10, medium: 20, hard: 40 },
-  football: { easy: 10, medium: 20, hard: 40 },
-  ai: { easy: 15, medium: 30, hard: 60 },
-};
-
-const STREAK_BONUS: Record<number, number> = {
-  1: 10,
-  2: 20,
-  3: 30,
-  4: 40,
-  5: 50,
-};
 
 const STORAGE_KEY = 'nexora_game_v2';
 
@@ -208,6 +208,7 @@ interface GameContextType {
   gameState: GameState;
   awardXP: (cat: CategoryType, diff: DifficultyType, correct: boolean) => number;
   addChallenge: (record: ChallengeRecord) => void;
+  applyServerResult: (result: ServerAnswerResult) => void;
   checkStreak: () => void;
   unlockAchievement: (id: string) => void;
   setPremium: (txHash: string) => void;
@@ -413,6 +414,78 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   }, [updateState]);
 
+  const applyServerResult = useCallback((result: ServerAnswerResult) => {
+    setGameState((prev) => {
+      const prevLevel = prev.level;
+      const prevRank = prev.rank;
+
+      const level = calcLevel(result.totalXP);
+      const levelProgress = calcLevelProgress(result.totalXP);
+      const xpToNextLevel = calcXPToNext(result.totalXP);
+      const rankScore = calcRankScore(
+        result.totalXP,
+        result.correctAnswers,
+        result.totalChallenges
+      );
+      const rank = calcRank(rankScore);
+      const accuracy =
+        result.totalChallenges > 0
+          ? result.correctAnswers / result.totalChallenges
+          : 0;
+
+      const record: ChallengeRecord = {
+        id: Date.now().toString(),
+        category: result.category,
+        difficulty: result.difficulty,
+        isCorrect: result.isCorrect,
+        xpEarned: result.xpEarned,
+        timestamp: new Date().toISOString(),
+      };
+
+      const computed: GameState = {
+        ...prev,
+        totalXP: result.totalXP,
+        level,
+        levelProgress,
+        xpToNextLevel,
+        rank,
+        rankScore,
+        accuracy,
+        correctAnswers: result.correctAnswers,
+        totalChallenges: result.totalChallenges,
+        streak: result.newStreak,
+        lastActiveDate: getToday(),
+        challengeHistory: [record, ...prev.challengeHistory].slice(0, 100),
+      };
+
+      if (level > prevLevel) setLevelUpSignal(level);
+      if (rank !== prevRank) setRankUpSignal(rank);
+      if (result.xpEarned > 0) setXpGainSignal(result.xpEarned);
+      if (result.streakBonus > 0) {
+        setStreakBonusSignal({ day: result.newStreak, xp: result.streakBonus });
+      }
+
+      const newUnlocks = checkAchievements(computed);
+      if (newUnlocks.length > 0) {
+        computed.achievements = [...computed.achievements, ...newUnlocks];
+        setNewAchievementSignal(newUnlocks[0]);
+      }
+
+      return computed;
+    });
+
+    if (currentWalletRef.current) {
+      saveChallengeDB(currentWalletRef.current, {
+        id: Date.now().toString(),
+        category: result.category,
+        difficulty: result.difficulty,
+        isCorrect: result.isCorrect,
+        xpEarned: result.xpEarned,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }, []);
+
   const unlockAchievement = useCallback(
     (id: string) => {
       if (gameState.achievements.includes(id)) return;
@@ -532,6 +605,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         gameState,
         awardXP,
         addChallenge,
+        applyServerResult,
         checkStreak,
         unlockAchievement,
         setPremium,

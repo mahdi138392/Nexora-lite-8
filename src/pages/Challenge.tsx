@@ -18,19 +18,12 @@ import {
   Zap,
 } from 'lucide-react';
 import { BrainIcon, FootballIcon, CircuitIcon } from '../components/CategoryIcons';
-import { generateQuestion, QuestionData } from '../lib/gemini';
+import { generateQuestion, submitAnswer, QuestionData, AnswerResult } from '../lib/gemini';
 import { useGame } from '../context/GameContext';
+import { useWallet } from '../context/WalletContext';
 import type { CategoryType, DifficultyType } from '../context/GameContext';
-import { calculateStreak } from '../lib/streak';
 
 type ChallengeState = 'category' | 'difficulty' | 'loading' | 'question' | 'correct' | 'wrong';
-
-type ResultMeta = {
-  isCorrect: boolean;
-  xpEarned: number;
-  streakXP: number;
-  streakDay: number;
-};
 
 interface Category {
   id: CategoryType;
@@ -57,14 +50,6 @@ interface Difficulty {
   borderColor: string;
   glow: string;
 }
-
-const STREAK_BONUS: Record<number, number> = {
-  1: 10,
-  2: 20,
-  3: 30,
-  4: 40,
-  5: 50,
-};
 
 const categories: Category[] = [
   {
@@ -165,9 +150,10 @@ const Challenge: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [resultMeta, setResultMeta] = useState<ResultMeta | null>(null);
+  const [serverResult, setServerResult] = useState<AnswerResult | null>(null);
 
-  const { gameState, awardXP, addChallenge, checkStreak } = useGame();
+  const { applyServerResult } = useGame();
+  const { walletAddress } = useWallet();
 
   const selectedDifficultyXP = useMemo(
     () => (selectedDifficulty ? getAdjustedXP(selectedCategory?.id, selectedDifficulty) : 0),
@@ -177,7 +163,7 @@ const Challenge: React.FC = () => {
   const resetRound = () => {
     setSelectedAnswer(null);
     setCurrentQuestion(null);
-    setResultMeta(null);
+    setServerResult(null);
     setTimeLeft(30);
   };
 
@@ -197,7 +183,7 @@ const Challenge: React.FC = () => {
     resetRound();
 
     try {
-      const q = await generateQuestion(selectedCategory.id, difficulty.id);
+      const q = await generateQuestion(selectedCategory.id, difficulty.id, walletAddress);
       setCurrentQuestion(q);
       setTimeLeft(30);
       setState('question');
@@ -205,51 +191,55 @@ const Challenge: React.FC = () => {
       setAiError(err instanceof Error ? err.message : 'Failed to generate question.');
       setState('difficulty');
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, walletAddress]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (!currentQuestion || !selectedCategory || !selectedDifficulty || isSubmitting) return;
     setIsSubmitting(true);
 
     const answerKey = selectedAnswer !== null
-      ? String.fromCharCode(65 + selectedAnswer) as 'A' | 'B' | 'C' | 'D'
+      ? (String.fromCharCode(65 + selectedAnswer) as 'A' | 'B' | 'C' | 'D')
       : null;
-    const isCorrect = answerKey !== null && answerKey === currentQuestion.correct;
-    const streakPreview = calculateStreak(gameState.streak, gameState.lastActiveDate);
-    const shouldAwardStreak = isCorrect && streakPreview.shouldGrantReward;
-    const nextStreakDay = shouldAwardStreak ? streakPreview.streak : gameState.streak;
-    const streakXP = shouldAwardStreak ? STREAK_BONUS[nextStreakDay] ?? 10 : 0;
 
-    const xpEarned = awardXP(selectedCategory.id, selectedDifficulty.id, isCorrect);
+    try {
+      const result = await submitAnswer(
+        currentQuestion.questionId,
+        walletAddress,
+        answerKey,
+        selectedCategory.id as any,
+        selectedDifficulty.id as any
+      );
 
-    addChallenge({
-      id: Date.now().toString(),
-      category: selectedCategory.id,
-      difficulty: selectedDifficulty.id,
-      isCorrect,
-      xpEarned,
-      timestamp: new Date().toISOString(),
-    });
+      applyServerResult({
+        isCorrect: result.isCorrect,
+        xpEarned: result.xpEarned,
+        streakBonus: result.streakBonus,
+        newStreak: result.newStreak,
+        totalXP: result.totalXP,
+        correctAnswers: result.correctAnswers,
+        totalChallenges: result.totalChallenges,
+        category: selectedCategory.id as any,
+        difficulty: selectedDifficulty.id as any,
+      });
 
-    if (isCorrect) checkStreak();
+      setServerResult(result);
 
-    setResultMeta({ isCorrect, xpEarned, streakXP, streakDay: nextStreakDay });
-
-    setTimeout(() => {
-      setState(isCorrect ? 'correct' : 'wrong');
+      setTimeout(() => {
+        setState(result.isCorrect ? 'correct' : 'wrong');
+        setIsSubmitting(false);
+      }, 400);
+    } catch (err: any) {
       setIsSubmitting(false);
-    }, 420);
+      setAiError(err.message || 'Failed to submit answer. Please try again.');
+    }
   }, [
-    addChallenge,
-    awardXP,
-    checkStreak,
+    applyServerResult,
     currentQuestion,
-    gameState.lastActiveDate,
-    gameState.streak,
     isSubmitting,
     selectedAnswer,
     selectedCategory,
     selectedDifficulty,
+    walletAddress,
   ]);
 
   useEffect(() => {
@@ -553,9 +543,10 @@ const Challenge: React.FC = () => {
   };
 
   const renderResult = (isCorrect: boolean) => {
-    const correctAnswer = currentQuestion ? currentQuestion.options[currentQuestion.correct] : '';
-    const earnedXP = resultMeta?.xpEarned ?? 0;
-    const streakXP = resultMeta?.streakXP ?? 0;
+    const correctAnswerLetter = serverResult?.correctAnswer;
+    const correctAnswer = currentQuestion && correctAnswerLetter ? currentQuestion.options[correctAnswerLetter] : '';
+    const earnedXP = serverResult?.xpEarned ?? 0;
+    const streakXP = serverResult?.streakBonus ?? 0;
 
     return renderShell(
       <div className="flex min-h-[72vh] items-center justify-center">
@@ -592,12 +583,12 @@ const Challenge: React.FC = () => {
           <div className="px-5 pb-6 sm:px-6">
             <div className="rounded-2xl border border-white/5 bg-secondary-layer/70 p-5">
               <p className="eyebrow-label text-xs text-text-secondary">Correct answer</p>
-              <p className="mt-2 font-black text-text-primary">{currentQuestion?.correct}. {correctAnswer}</p>
+              <p className="mt-2 font-black text-text-primary">{correctAnswerLetter}. {correctAnswer}</p>
               <div className="my-4 h-px bg-white/5" />
-              <p className="text-sm leading-relaxed text-text-secondary">{currentQuestion?.explanation}</p>
+              <p className="text-sm leading-relaxed text-text-secondary">{serverResult?.explanation}</p>
               {isCorrect && streakXP > 0 && (
                 <p className="mt-4 rounded-xl bg-primary/10 px-4 py-3 text-sm font-bold text-primary">
-                  Day {resultMeta?.streakDay} streak activated for +{streakXP} bonus XP.
+                  Day {serverResult?.newStreak} streak activated for +{streakXP} bonus XP.
                 </p>
               )}
             </div>

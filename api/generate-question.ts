@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -19,7 +21,7 @@ export default async function handler(req: any, res: any) {
     hard: 'requires deep expertise or very specific/obscure knowledge',
   };
 
-  const { category, difficulty } = req.body || {};
+  const { category, difficulty, walletAddress } = req.body || {};
   if (!CATEGORY_PROMPTS[category] || !DIFFICULTY_PROMPTS[difficulty]) {
     res.status(400).json({ error: 'Invalid category or difficulty' });
     return;
@@ -119,6 +121,42 @@ Return EXACTLY this JSON (nothing else):
     throw new Error('AI returned invalid correct answer key');
   }
 
-  res.status(200).json(parsed);
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    res.status(500).json({ error: 'Server missing Supabase service credentials' });
+    return;
+  }
+
+  const supabaseAdmin = createClient(supabaseUrl, serviceKey);
+
+  if (!walletAddress) {
+    res.status(400).json({ error: 'Missing walletAddress' });
+    return;
+  }
+
+  const { data: inserted, error: insertError } = await supabaseAdmin
+    .from('pending_questions')
+    .insert({
+      wallet_address: String(walletAddress).toLowerCase(),
+      category,
+      difficulty,
+      correct_answer: parsed.correct,
+      explanation: parsed.explanation,
+    })
+    .select('id')
+    .single();
+
+  if (insertError || !inserted) {
+    res.status(500).json({ error: 'Failed to store question' });
+    return;
+  }
+
+  res.status(200).json({
+    questionId: inserted.id,
+    question: parsed.question,
+    options: parsed.options,
+  });
   return;
 }
