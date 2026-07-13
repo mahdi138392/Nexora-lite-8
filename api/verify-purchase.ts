@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { ethers } from 'ethers';
 
-const RITUAL_RPC = 'https://rpc.ritualfoundation.org';
-const FEE_RECIPIENT = '0xd06bC18129a8be9af885E7E63B1B95FB19c261b3';
+const RITUAL_RPC = process.env.RITUAL_RPC_URL || 'https://rpc.ritualfoundation.org';
+const FEE_RECIPIENT = process.env.FEE_RECIPIENT || '0xd06bC18129a8be9af885E7E63B1B95FB19c261b3';
 type ItemType = 'xp_booster' | 'premium_pass';
 
 interface ApiRequest {

@@ -20,10 +20,8 @@ import {
   calcXPToNext,
   calcRankScore,
   calcRank,
-  XP_TABLE,
-  STREAK_BONUS,
 } from '../lib/gameCalculations';
-import { calculateStreak, getToday, normalizeStreakTimestamp } from '../lib/streak';
+import { getToday, normalizeStreakTimestamp } from '../lib/streak';
 
 // ============== TYPES ==============
 
@@ -206,10 +204,7 @@ function saveToStorage(state: GameState, walletAddr?: string) {
 
 interface GameContextType {
   gameState: GameState;
-  awardXP: (cat: CategoryType, diff: DifficultyType, correct: boolean) => number;
-  addChallenge: (record: ChallengeRecord) => void;
   applyServerResult: (result: ServerAnswerResult) => void;
-  checkStreak: () => void;
   unlockAchievement: (id: string) => void;
   setPremium: (txHash: string) => void;
   setXPBooster: (txHash: string) => void;
@@ -236,9 +231,6 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [gameState, setGameState] = useState<GameState>(() => loadFromStorage());
   const [walletAddr, setWalletAddr] = useState<string>('');
-  const tabIdRef = useRef(
-    globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
-  );
   const currentWalletRef = useRef('');
   const syncTimer = useRef<ReturnType<typeof setTimeout>>();
   const [levelUpSignal, setLevelUpSignal] = useState<number | null>(null);
@@ -347,72 +339,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     },
     []
   );
-
-  const awardXP = useCallback(
-    (cat: CategoryType, diff: DifficultyType, correct: boolean): number => {
-      if (!correct) return 0;
-      let base = XP_TABLE[cat][diff];
-      if (
-        gameState.xpBoosterActive &&
-        gameState.xpBoosterExpiry &&
-        Date.now() < gameState.xpBoosterExpiry
-      ) {
-        base = Math.ceil(base * 1.5);
-      }
-      updateState((prev) => ({ ...prev, totalXP: prev.totalXP + base }));
-      setXpGainSignal(base);
-      return base;
-    },
-    [gameState, updateState]
-  );
-
-  const addChallenge = useCallback(
-    (record: ChallengeRecord) => {
-      updateState((prev) => ({
-        ...prev,
-        correctAnswers: prev.correctAnswers + (record.isCorrect ? 1 : 0),
-        totalChallenges: prev.totalChallenges + 1,
-        challengeHistory: [record, ...prev.challengeHistory].slice(0, 100),
-      }));
-      if (currentWalletRef.current) {
-        saveChallengeDB(currentWalletRef.current, record);
-      }
-    },
-    [updateState]
-  );
-
-  const checkStreak = useCallback(() => {
-    const now = Date.now();
-    const today = getToday(now);
-    const lockKey = `${STORAGE_KEY}_streak_lock_${(currentWalletRef.current || 'local').toLowerCase()}_${today}`;
-    const owner = tabIdRef.current;
-
-    try {
-      const existing = localStorage.getItem(lockKey);
-      if (existing && JSON.parse(existing).expiresAt > now) return;
-      localStorage.setItem(lockKey, JSON.stringify({ owner, expiresAt: now + 10_000 }));
-      const claimed = localStorage.getItem(lockKey);
-      if (!claimed || JSON.parse(claimed).owner !== owner) return;
-    } catch {
-      // Continue without a cross-tab lock if storage is unavailable.
-    }
-
-    updateState((prev) => {
-      const result = calculateStreak(prev.streak, prev.lastActiveDate, now);
-      if (!result.shouldGrantReward) return prev;
-
-      const bonusXP = STREAK_BONUS[result.streak] ?? 10;
-      setStreakBonusSignal({ day: result.streak, xp: bonusXP });
-
-      return {
-        ...prev,
-        streak: result.streak,
-        lastActiveDate: today,
-        totalXP: prev.totalXP + bonusXP,
-      };
-    });
-
-  }, [updateState]);
 
   const applyServerResult = useCallback((result: ServerAnswerResult) => {
     setGameState((prev) => {
@@ -603,10 +529,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <GameContext.Provider
       value={{
         gameState,
-        awardXP,
-        addChallenge,
         applyServerResult,
-        checkStreak,
         unlockAchievement,
         setPremium,
         setXPBooster,

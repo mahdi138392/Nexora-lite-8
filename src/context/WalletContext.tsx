@@ -36,11 +36,11 @@ const RITUAL_NETWORK = {
     symbol: 'RITUAL',
     decimals: 18,
   },
-  rpcUrls: ['https://rpc.ritualfoundation.org'],
+  rpcUrls: [import.meta.env.VITE_RITUAL_RPC_URL || 'https://rpc.ritualfoundation.org'],
   blockExplorerUrls: ['https://explorer.ritualfoundation.org'],
 };
 
-const FEE_RECIPIENT = '0xd06bC18129a8be9af885E7E63B1B95FB19c261b3';
+const FEE_RECIPIENT = import.meta.env.VITE_FEE_RECIPIENT || '0xd06bC18129a8be9af885E7E63B1B95FB19c261b3';
 
 interface WalletContextType {
   isConnected: boolean;
