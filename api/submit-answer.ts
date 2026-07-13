@@ -126,7 +126,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const rank = calcRank(rankScore);
 
     // 6. Write the authoritative update (service role bypasses RLS/trigger)
-    await supabase
+    const { error: updateError } = await supabase
       .from('users')
       .update({
         total_xp: newTotalXP,
@@ -141,14 +141,29 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       })
       .eq('wallet_address', addr);
 
-    await supabase.from('challenge_history').insert({
-      wallet_address: addr,
-      category,
-      difficulty,
-      is_correct: isCorrect,
-      xp_earned: xpEarned,
-      created_at: new Date().toISOString(),
-    });
+    if (updateError) {
+      console.error('[submit-answer] user update failed:', updateError);
+      res.status(500).json({ error: 'Failed to save result. Please try again.' });
+      return;
+    }
+
+    const { error: historyError } = await supabase
+      .from('challenge_history')
+      .insert({
+        wallet_address: addr,
+        category,
+        difficulty,
+        is_correct: isCorrect,
+        xp_earned: xpEarned,
+        created_at: new Date().toISOString(),
+      });
+
+    if (historyError) {
+      // Non-fatal: the user's XP/level update already succeeded, only the
+      // history log entry failed. Log it but still return success since
+      // the authoritative score was saved correctly.
+      console.error('[submit-answer] history insert failed:', historyError);
+    }
 
     res.status(200).json({
       isCorrect,

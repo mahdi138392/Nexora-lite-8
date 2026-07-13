@@ -94,19 +94,31 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const addr = walletAddress.toLowerCase();
 
     if (itemType === 'premium_pass') {
-      await supabase
+      const { error: updateError } = await supabase
         .from('users')
         .update({ premium_status: true, premium_purchased_at: now, updated_at: now })
         .eq('wallet_address', addr);
+
+      if (updateError) {
+        console.error('[verify-purchase] premium pass update failed:', updateError);
+        res.status(500).json({ error: 'Failed to apply purchase. Please try again.' });
+        return;
+      }
     } else {
       const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-      await supabase
+      const { error: updateError } = await supabase
         .from('users')
         .update({ xp_booster_active: true, xp_booster_expiry: expiry, updated_at: now })
         .eq('wallet_address', addr);
+
+      if (updateError) {
+        console.error('[verify-purchase] XP booster update failed:', updateError);
+        res.status(500).json({ error: 'Failed to apply purchase. Please try again.' });
+        return;
+      }
     }
 
-    await supabase.from('transactions').insert({
+    const { error: transactionError } = await supabase.from('transactions').insert({
       wallet_address: addr,
       transaction_type: itemType,
       tx_hash: txHash,
@@ -114,6 +126,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       status: 'confirmed',
       created_at: now,
     });
+
+    if (transactionError) {
+      // Non-fatal: the user row update already succeeded, only the purchase
+      // log entry failed. Log it but still return success since the purchase
+      // effect was saved correctly.
+      console.error('[verify-purchase] transaction insert failed:', transactionError);
+    }
 
     res.status(200).json({ success: true });
   } catch (err: unknown) {

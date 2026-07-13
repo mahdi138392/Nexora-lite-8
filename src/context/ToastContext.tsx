@@ -75,7 +75,7 @@ function NotificationItem({ toast, onRemove }: NotificationItemProps) {
     <div
       role={toast.type === 'error' || toast.type === 'warning' ? 'alert' : 'status'}
       aria-live={toast.type === 'error' || toast.type === 'warning' ? 'assertive' : 'polite'}
-      className="notification-toast pointer-events-auto grid grid-cols-[auto,minmax(0,1fr),auto] gap-3.5 rounded-2xl border px-4 py-3.5 shadow-[0_24px_70px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.035),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-4.5"
+      className="notification-toast pointer-events-auto grid grid-cols-[auto,minmax(0,1fr),auto] gap-3.5 rounded-2xl border px-4 py-3.5 shadow-[0_24px_70px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.035),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-5"
       style={{
         background: `linear-gradient(135deg, ${cfg.color}18 0%, rgba(9, 7, 5, 0) 34%), #15110D`,
         borderColor: 'rgba(255, 180, 90, 0.15)',
