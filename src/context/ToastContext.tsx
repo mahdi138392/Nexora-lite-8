@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckCircle, XCircle, AlertCircle, Info, X, Trophy, Flame, Star } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -142,20 +142,35 @@ function NotificationPortal({ toasts, onRemove }: NotificationContainerProps) {
 
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const timers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+  const removeToast = useCallback((id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+    const timer = timers.current.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      timers.current.delete(id);
+    }
+  }, []);
 
   const showToast = useCallback(
     (type: ToastType, message: string, link?: ToastLink) => {
       const id = Date.now() + Math.random();
       setToasts((prev) => [...prev, { id, type, message, link }]);
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
+      const timer = setTimeout(() => {
+        removeToast(id);
       }, 6000);
+      timers.current.set(id, timer);
     },
-    []
+    [removeToast]
   );
 
-  const removeToast = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  useEffect(() => {
+    const timersMap = timers.current;
+    return () => {
+      timersMap.forEach((timer) => clearTimeout(timer));
+      timersMap.clear();
+    };
   }, []);
 
   return (

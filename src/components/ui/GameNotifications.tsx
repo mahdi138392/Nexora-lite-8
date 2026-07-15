@@ -9,7 +9,6 @@ const GameNotifications: React.FC = () => {
     xpGainSignal,
     newAchievementSignal,
     streakBonusSignal,
-    clearSignals,
     clearLevelUpSignal,
     clearRankUpSignal,
     clearXpGainSignal,
@@ -94,7 +93,7 @@ const GameNotifications: React.FC = () => {
           style={{ backgroundColor: 'rgba(9,7,5,0.95)', backdropFilter: 'blur(4px)' }}
           onClick={() => {
             setShowLevelUp(false);
-            clearSignals();
+            clearLevelUpSignal();
           }}
         >
           <div className="pointer-events-none text-center">
