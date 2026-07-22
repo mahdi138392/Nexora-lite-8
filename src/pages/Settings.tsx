@@ -25,13 +25,14 @@ const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void }> = (
   <button
     type="button"
     onClick={() => onChange(!checked)}
-    className={`relative h-7 w-12 rounded-full border transition-all duration-200 ${checked ? 'border-brand-purple/50 bg-brand-purple shadow-[0_10px_24px_rgba(0,0,0,0.24)]' : 'border-white/10 bg-secondary-layer'}`}
     aria-pressed={checked}
+    className={`flex h-7 w-12 items-center rounded-full border p-0.5 transition-colors duration-200 ${
+      checked
+        ? 'justify-end border-brand-purple/50 bg-brand-purple shadow-[0_10px_24px_rgba(0,0,0,0.24)]'
+        : 'justify-start border-white/10 bg-secondary-layer'
+    }`}
   >
-    <span
-      className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-lg transition-transform duration-200"
-      style={{ transform: checked ? 'translateX(22px)' : 'translateX(2px)' }}
-    />
+    <span className="h-6 w-6 rounded-full bg-white shadow-lg" />
   </button>
 );
 
