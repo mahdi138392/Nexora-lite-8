@@ -156,7 +156,23 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const showToast = useCallback(
     (type: ToastType, message: string, link?: ToastLink) => {
       const id = Date.now() + Math.random();
-      setToasts((prev) => [...prev, { id, type, message, link }]);
+      setToasts((prev) => {
+        const deduped = prev.filter((toast) => {
+          const isDuplicate = toast.type === type && toast.message === message;
+
+          if (isDuplicate) {
+            const duplicateTimer = timers.current.get(toast.id);
+            if (duplicateTimer) {
+              clearTimeout(duplicateTimer);
+              timers.current.delete(toast.id);
+            }
+          }
+
+          return !isDuplicate;
+        });
+
+        return [...deduped, { id, type, message, link }];
+      });
       const timer = setTimeout(() => {
         removeToast(id);
       }, 6000);
